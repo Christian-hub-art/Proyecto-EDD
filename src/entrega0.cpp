@@ -20,6 +20,7 @@ int main(){
             cout<<"es_subsecuencia"<<endl;
             cout<<"enmascarar"<<endl;
             cout<<"guardar"<<endl;
+            cout<<"salir"<<endl;
         }
         if(esComandoValido(comando)){
             cout<<"Comando ingresado    Correctamente "<<endl;
