@@ -8,8 +8,12 @@ bool esComandoValido(const string& comando) {
     vector<string> comandosValidos = {
         "cargar nombre_archivo",
         "listar_secuencias",
-        "histograma descripcion_secuencia"
-    };
+        "histograma descripcion_secuencia",   
+        "es_subsecuencia",
+        "enmascarar",
+        "guardar", 
+        "ayuda"
+};
 
     for (const string& valido : comandosValidos) {
         if (comando == valido) {
