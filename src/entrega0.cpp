@@ -26,7 +26,7 @@ int main(){
             cout<<"Comando ingresado    Correctamente "<<endl;
         }
         else{
-            cout<<"Comando invalido. Intente nuevamente"<<endl;
+            cout<<"Comando invalido. Intente nuevamente. O Pruebe el comando ayuda " <<endl;
         }
     }
     
