@@ -1,7 +1,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
 
+#include "Secuencia.h"
 #include "entrega0.h"
 using namespace std; 
 
@@ -66,11 +68,56 @@ void ayudaComando(const string& comando){ // recibe como entrada el comando tipo
     };
     
     for (int i =0; i<comandos.size(); i++){ // por medio de un for se busca primero en arreglo tipo vector comando que si sea acorde con el de usuario y luego con el itarador 
-                                            // acceder entonces con el comando ya econtrado a la misma posicion en que esta que corresponde a la de su descripcion
+                                            // acceder entonces con el comando ya encontrado a la misma posicion en que esta que corresponde a la de su descripcion
         if (comando == comandos[i]){
             cout<<descripcion[i]<<endl;
             break;
         }
     }
 
+}
+
+
+void cargar(const string& nombreArchivo, vector<Secuencia>& memoria) {
+    ifstream archivo(nombreArchivo);
+
+    if (!archivo.is_open()) {
+        cout << nombreArchivo << " no se encuentra o no puede leerse." << endl;
+        return;
+    }
+
+    memoria.clear(); // sobrescribir lo que había antes
+
+    string linea, nombreActual, datosActual;
+    while (getline(archivo, linea)) {
+        if (linea.empty()) continue;
+
+        if (linea[0] == '>') {
+            if (!nombreActual.empty()) {
+                memoria.push_back({nombreActual, datosActual});
+                datosActual.clear();
+            }
+            nombreActual = linea.substr(1);
+        } else {
+            datosActual += linea;
+        }
+    }
+
+    if (!nombreActual.empty()) {
+        memoria.push_back({nombreActual, datosActual});
+    }
+
+    int n = memoria.size();
+    if (n == 0) {
+        cout << nombreArchivo << " no contiene ninguna secuencia." << endl;
+    } else if (n == 1) {
+        cout << "1 secuencia cargada correctamente desde " << nombreArchivo << "." << endl;
+    } else {
+        cout << n << " secuencias cargadas correctamente desde " << nombreArchivo << "." << endl;
+    }
+}
+
+void listarSecuencias(const vector<Secuencia>& memoria){
+
+    
 }

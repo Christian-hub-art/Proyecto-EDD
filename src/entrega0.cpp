@@ -1,32 +1,58 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
+#include <sstream>  // para dividir el comando en tokens
+
+#include "Secuencia.h"
 #include "entrega0.h"
 using namespace std; 
 
+int main(int argc, char* argv[]) {
+    vector<Secuencia> memoria; 
 
-int main(){
-    string comando; // se define una variable tipo string para alamecenar lo que escribe el usuario
-    while(true){ // el while true nos sirve para generar ciclos infinitos hasta que el usuario decida colocar el comando salir
-        cout<<"$";
-        getline(cin,comando); // almacena con espacios la cadena que digitalice el usuario
-       
-        if (comando=="salir"){ // comando salir rompe el ciclo y termina con el prgrama 
+    string comando;
+    while (true) {
+        cout << "$";
+        getline(cin, comando);  
+
+        if (comando == "salir") {
             break;
         }
-        if (comando=="ayuda"){ // con elcoamndo ayuda se muestran todos los comandos disponibles que hay
+        if (comando == "ayuda") {
             mostrarComandos();
+            continue; // ya mostramos, no seguimos
+        }
+
+        ayudaComando(comando);
+
+        if (esComandoValido(comando)) {
+            cout << "Comando ingresado Correctamente " << endl;
+        } else {
+            cout << "Comando invalido. Revise nuevamente la guia con el comando de ayuda" << endl;
+        }
+
+        // Hacermos token para poder manipular las palabras en un vector y asi acceder mas sencillo a estas mismas
+        istringstream iss(comando);
+        vector<string> tokens;
+        string palabra;
+        while (iss >> palabra) {
+            tokens.push_back(palabra);
+        }
+
+        // ahora tokens[0] es el comando, tokens[1] sería el archivo
+        if (tokens.size() == 2 && tokens[0] == "cargar") {
+            cargar(tokens[1], memoria);
         }
         
-        ayudaComando(comando); // si digitaliza algun comando ayuda comando mostrara los detalles de aquel comando 
-        
-        if(esComandoValido(comando)){  // le dice al usuario si el comando que dgitalizo si se encuentra o no
-            cout<<"Comando ingresado Correctamente "<<endl;
+        if (tokens[0] == "listar_secuencias" && tokens.size() > 1) {
+            cout << "Error: listar_secuencias no recibe parámetros. Prueba con 'ayuda'." << endl;
+            continue;
         }
-        else{
-            cout<<"Comando invalido. Revise nuevamente la guia con el comando de ayuda"<<endl; // valida que el comando se digitalizo mal y le sugiere al usuario el comando ayuda
+        if (tokens[0] == "listar_secuencias" && tokens.size() == 1) {
+            listarSecuencias(memoria);
         }
+
     }
-    
-    return 0 ; 
+    return 0; 
 }
