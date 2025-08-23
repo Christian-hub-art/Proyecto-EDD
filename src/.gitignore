@@ -1,0 +1,7 @@
+# Archivos y carpetas de Visual Studio Code
+.vscode/
+
+# Archivos ejecutables de C++
+*.exe
+*.out
+*.o
