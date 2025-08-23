@@ -1,8 +1,23 @@
+#include <cstring>
 #include <iostream>
+#include <stdlib.h>
 #include <string>
-#include <vector>
 using namespace std;
 
-bool esComandoValido(const string& comando); // de define la funcion de comando valido
-void mostrarComandos(); // se define la funcion de mostrar comandos
-void ayudaComando(const string& comando); // se define la funcion de ayuda que mostrara los detalles de cada comando
+#ifndef __ENTREGA0__H
+#define __ENTREGA0__H
+
+void cargar_archivo();
+void listar_secuencias();
+void histograma_secuencia();
+void es_subsecuencia();
+void enmascarar_subsecuencia();
+void guardar_archivo();
+void codificar_archivo();
+void decodificar_archivo();
+void ruta_mas_corta();
+void base_remota();
+void ayuda();
+void ayudaComando(string comando);
+
+#endif
