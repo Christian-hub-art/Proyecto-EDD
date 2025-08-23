@@ -1,13 +1,52 @@
 #include "entrega0.h"
+#include "Secuencia.h"
 #include <cstring>
 #include <iostream>
 #include <stdlib.h>
 #include <string>
+#include <vector>
+#include <fstream>
+
 using namespace std;
 
-
-void cargar_archivo(){
+void cargar_archivo(const string& nombreArchivo, vector<Secuencia>& memoria){
   cout<<"Comando ejecutado\n";
+  ifstream archivo(nombreArchivo);
+
+    if (!archivo.is_open()) {
+        cout << nombreArchivo << " no se encuentra o no puede leerse." << endl;
+        return;
+    }
+
+    memoria.clear(); // sobrescribir lo que había antes
+
+    string linea, nombreActual, datosActual;
+    while (getline(archivo, linea)) {
+        if (linea.empty()) continue;
+
+        if (linea[0] == '>') {
+            if (!nombreActual.empty()) {
+                memoria.push_back({nombreActual, datosActual});
+                datosActual.clear();
+            }
+            nombreActual = linea.substr(1);
+        } else {
+            datosActual += linea;
+        }
+    }
+
+    if (!nombreActual.empty()) {
+        memoria.push_back({nombreActual, datosActual});
+    }
+
+    int n = memoria.size();
+    if (n == 0) {
+        cout << nombreArchivo << " no contiene ninguna secuencia." << endl;
+    } else if (n == 1) {
+        cout << "1 secuencia cargada correctamente desde " << nombreArchivo << "." << endl;
+    } else {
+        cout << n << " secuencias cargadas correctamente desde " << nombreArchivo << "." << endl;
+    }
 }
 
 void listar_secuencias(){

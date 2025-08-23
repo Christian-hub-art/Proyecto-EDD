@@ -2,12 +2,16 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string>
+#include <vector>
+#include "Secuencia.h"
+
+
 using namespace std;
 
 #ifndef __ENTREGA0__H
 #define __ENTREGA0__H
 
-void cargar_archivo();
+void cargar_archivo(const string& nombreArchivo, vector<Secuencia>& memoria);
 void listar_secuencias();
 void histograma_secuencia();
 void es_subsecuencia();

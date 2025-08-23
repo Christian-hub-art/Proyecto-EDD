@@ -3,9 +3,13 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string>
+#include <vector>
+#include "Secuencia.h"
+
 using namespace std;
 
 int main() {
+  vector<Secuencia> memoria;     
   string opcion;
   string entrada;
   int numtokes = 0;
@@ -51,7 +55,7 @@ int main() {
 
     } else if (strcmp(tokens[0].c_str(), "cargar") == 0) {
       if (index == 2) {
-        cargar_archivo();
+        cargar_archivo(tokens[2], memoria);
       } else {
         comandoValido = false;
       }
