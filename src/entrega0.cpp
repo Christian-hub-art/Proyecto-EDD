@@ -49,8 +49,20 @@ void cargar_archivo(const string& nombreArchivo, vector<Secuencia>& memoria){
     }
 }
 
-void listar_secuencias(){
-  cout<<"Comando ejecutado\n";
+void listar_secuencias(const vector<Secuencia>& memoria){
+    if (memoria.empty()) {
+        cout << "(no hay secuencias cargadas) No hay secuencias cargadas en memoria." << endl;
+        return;
+    }
+
+    cout << "resultado exitoso Hay " << memoria.size() 
+         << " secuencias cargadas en memoria:" << endl;
+
+    for (size_t i = 0; i < memoria.size(); i++) {
+        cout << "Secuencia " << memoria[i].nombre 
+             << " contiene " << memoria[i].datos.size() 
+             << " bases." << endl;
+    }
 }
 
 void histograma_secuencia(){

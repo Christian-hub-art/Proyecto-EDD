@@ -75,7 +75,7 @@ int main()
         {
             if (index == 1)
             {
-                listar_secuencias();
+                listar_secuencias(memoria);
             }
             else
             {

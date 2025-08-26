@@ -12,7 +12,7 @@ using namespace std;
 #define __ENTREGA0__H
 
 void cargar_archivo(const string& nombreArchivo, vector<Secuencia>& memoria);
-void listar_secuencias();
+void listar_secuencias(const vector<Secuencia>& memoria);
 void histograma_secuencia();
 void es_subsecuencia();
 void enmascarar_subsecuencia();
