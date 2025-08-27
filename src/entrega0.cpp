@@ -80,6 +80,7 @@ void  histograma_secuencia(const string secuencia, vector<Secuencia>& memoria){
 	     sec_temp = memoria[i];
        existente = true;
 	     break;
+     }
 	}
 
   if(!existente){
