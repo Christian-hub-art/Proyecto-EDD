@@ -65,11 +65,67 @@ void listar_secuencias(const vector<Secuencia>& memoria){
     }
 }
 
-void histograma_secuencia(){
+void  histograma_secuencia(const string secuencia, vector<Secuencia>& memoria){
+  
+  vector< char> codigo = {'A', 'C', 'G', 'T','U', 'R', 'Y', 'K', 'M', 'S', 'W',       'B', 'D', 'H', 'V', 'N', 'X', '-'};
+  
+  vector< int > conteo (codigo.size(), 0);
+  
+  bool existente = false;
+  
+  Secuencia sec_temp;
+  
+  for(int i = 0 ; i < memoria.size(); i++){
+	   if(secuencia == memoria[i].nombre){
+	     sec_temp = memoria[i];
+       existente = true;
+	     break;
+	}
+
+  if(!existente){
+    cout<<"La secuencia no existe\n";
+    return;
+  }
+    
+    for (int i = 0; i < sec_temp.datos.size(); i++) {
+        char letra = sec_temp.datos[i];
+        for (int j = 0; j < codigo.size(); j++) {
+            if (letra == codigo[j]) {
+                conteo[j]++;
+                break;
+            }
+        }
+    }
+
+  
+    for (int i = 0; i < codigo.size(); i++) {
+        cout << codigo[i] << " : " << conteo[i] << endl;
+    }
+
+  
   cout<<"Comando ejecutado\n";
 }
 
-void es_subsecuencia(){
+void es_subsecuencia(const string secuencia, vector<Secuencia>& memoria){
+  bool existente = false;
+  int conteo = 0;
+  for(int i = 0 ; i < memoria.size(); i++){
+    if(secuencia == memoria[i].nombre){
+      existente = true;
+      conteo ++;
+    }
+  }
+
+  if(!existente){
+    cout<<"La secuencia no existe\n";
+  } else {
+    if (conteo == 1){
+      cout<<"La secuencia existe 1 vez\n";
+    } else {
+      cout<<"La secuencia existe "<<conteo<<" veces\n";
+    }
+  }
+
   cout<<"Comando ejecutado\n";
 }
 

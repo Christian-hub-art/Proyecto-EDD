@@ -86,7 +86,7 @@ int main()
         {
             if (index == 2)
             {
-                histograma_secuencia();
+                 histograma_secuencia(tokens[1],memoria);
             }
             else
             {
@@ -97,7 +97,7 @@ int main()
         {
             if (index == 2)
             {
-                es_subsecuencia();
+                es_subsecuencia(tokens[1],memoria);
             }
             else
             {
