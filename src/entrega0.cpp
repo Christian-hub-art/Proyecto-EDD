@@ -25,18 +25,19 @@ void cargar_archivo(const string& nombreArchivo, vector<Secuencia>& memoria){
         if (linea.empty()) continue;
 
         if (linea[0] == '>') {
-            if (!nombreActual.empty()) {
-                memoria.push_back({nombreActual, datosActual});
+            if (nombreActual.empty()) {
+                nombreActual = linea.substr(1);
+                memoria.push_back({nombreActual});
                 datosActual.clear();
+                nombreActual.clear();
             }
-            nombreActual = linea.substr(1);
         } else {
+            if(datosActual.empty()){
+              memoria.back().setCantidadPorLinea(linea.size());
+            }
             datosActual += linea;
+            memoria.back().setDatos(datosActual);
         }
-    }
-
-    if (!nombreActual.empty()) {
-        memoria.push_back({nombreActual, datosActual});
     }
 
     int n = memoria.size();
@@ -58,25 +59,33 @@ void listar_secuencias(const vector<Secuencia>& memoria){
     cout << "resultado exitoso Hay " << memoria.size() 
          << " secuencias cargadas en memoria:" << endl;
 
+    vector<int> memoria_bases(memoria.size(), 0);
+    vector<bool> memoria_completa(memoria.size(), true);
+
+    for(int i = 0; i< memoria.size(); i++){
+      
+    }
+
+
     for (size_t i = 0; i < memoria.size(); i++) {
-        cout << "Secuencia " << memoria[i].nombre 
-             << " contiene " << memoria[i].datos.size() 
+        cout << "Secuencia " << memoria[i].getNombre() 
+             << " contiene " << memoria_bases[i] // TODO: corregir porque hay que contar la cantidad de caracteres diferentes
              << " bases." << endl;
+        cout<< memoria[i].getCantidadPorLinea() << " bases por linea." << endl;
     }
 }
 
 void  histograma_secuencia(const string secuencia, vector<Secuencia>& memoria){
   
-  vector< char> codigo = {'A', 'C', 'G', 'T','U', 'R', 'Y', 'K', 'M', 'S', 'W',       'B', 'D', 'H', 'V', 'N', 'X', '-'};
+  vector< char> codigo = {'A', 'C', 'G', 'T','U', 'R', 'Y', 'K', 'M', 'S', 'W', 'B', 'D', 'H', 'V', 'N', 'X', '-'};
   
   vector< int > conteo (codigo.size(), 0);
   
   bool existente = false;
-  
-  Secuencia sec_temp;
-  
+
+  Secuencia sec_temp = Secuencia("");
   for(int i = 0 ; i < memoria.size(); i++){
-	   if(secuencia == memoria[i].nombre){
+	   if(secuencia == memoria[i].getNombre()){
 	     sec_temp = memoria[i];
        existente = true;
 	     break;
@@ -88,8 +97,8 @@ void  histograma_secuencia(const string secuencia, vector<Secuencia>& memoria){
     return;
   }
     
-    for (int i = 0; i < sec_temp.datos.size(); i++) {
-        char letra = sec_temp.datos[i];
+    for (int i = 0; i < sec_temp.getDatos().size(); i++) {
+        char letra = sec_temp.getDatos()[i];
         for (int j = 0; j < codigo.size(); j++) {
             if (letra == codigo[j]) {
                 conteo[j]++;
@@ -111,7 +120,7 @@ void es_subsecuencia(const string secuencia, vector<Secuencia>& memoria){
   bool existente = false;
   int conteo = 0;
   for(int i = 0 ; i < memoria.size(); i++){
-    if(secuencia == memoria[i].nombre){
+    if(secuencia == memoria[i].getNombre()){
       existente = true;
       conteo ++;
     }
