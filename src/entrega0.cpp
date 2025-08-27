@@ -59,17 +59,9 @@ void listar_secuencias(const vector<Secuencia>& memoria){
     cout << "resultado exitoso Hay " << memoria.size() 
          << " secuencias cargadas en memoria:" << endl;
 
-    vector<int> memoria_bases(memoria.size(), 0);
-    vector<bool> memoria_completa(memoria.size(), true);
-
-    for(int i = 0; i< memoria.size(); i++){
-      
-    }
-
-
     for (size_t i = 0; i < memoria.size(); i++) {
         cout << "Secuencia " << memoria[i].getNombre() 
-             << " contiene " << memoria_bases[i] // TODO: corregir porque hay que contar la cantidad de caracteres diferentes
+             << " contiene " << memoria[i].getDatos().size() // TODO: corregir porque hay que contar la cantidad de caracteres diferentes
              << " bases." << endl;
         cout<< memoria[i].getCantidadPorLinea() << " bases por linea." << endl;
     }
