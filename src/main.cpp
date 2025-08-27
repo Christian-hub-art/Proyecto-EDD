@@ -64,7 +64,7 @@ int main()
         {
             if (index == 2)
             {
-                cargar_archivo(tokens[2], memoria);
+                cargar_archivo(tokens[1], memoria);
             }
             else
             {
