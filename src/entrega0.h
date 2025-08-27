@@ -13,8 +13,8 @@ using namespace std;
 
 void cargar_archivo(const string& nombreArchivo, vector<Secuencia>& memoria);
 void listar_secuencias(const vector<Secuencia>& memoria);
-void histograma_secuencia();
-void es_subsecuencia();
+void histograma_secuencia(const string secuencia, vector<Secuencia>& memoria);
+void es_subsecuencia(const string secuencia, vector <Secuencia>& memoria);
 void enmascarar_subsecuencia();
 void guardar_archivo();
 void codificar_archivo();
