@@ -135,9 +135,24 @@ void enmascarar_subsecuencia(){
   cout<<"Comando ejecutado\n";
 }
 
-void guardar_archivo(){
-  cout<<"Comando ejecutado\n";
-  
+void guardar_archivo(const string& nombreArchivo, const vector<Secuencia>& memoria){
+
+  std::ofstream archivo_salida(nombreArchivo);
+
+  if (!archivo_salida) {
+      cerr << "Error al abrir el archivo " << nombreArchivo << " para escritura." << endl;
+      return;
+  }
+
+  for (int i = 0;  i < memoria.size(); i++) {
+      archivo_salida << ">" << memoria[i].getNombre() << endl;
+      for(int j = 0; j < memoria[i].getDatos().size(); j += memoria[i].getCantidadPorLinea()) {
+          archivo_salida << memoria[i].getDatos().substr(j, memoria[i].getCantidadPorLinea()) << endl;
+      }
+  }
+
+  archivo_salida.close();
+  cout << "Comando ejecutado\n";
 }
 
 void codificar_archivo(){

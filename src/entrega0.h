@@ -16,7 +16,7 @@ void listar_secuencias(const vector<Secuencia>& memoria);
 void histograma_secuencia(const string secuencia, vector<Secuencia>& memoria);
 void es_subsecuencia(const string secuencia, vector <Secuencia>& memoria);
 void enmascarar_subsecuencia();
-void guardar_archivo();
+void guardar_archivo(const string& nombreArchivo, const vector<Secuencia>& memoria);
 void codificar_archivo();
 void decodificar_archivo();
 void ruta_mas_corta();
