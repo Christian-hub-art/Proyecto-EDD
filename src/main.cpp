@@ -119,7 +119,7 @@ int main()
         {
             if (index == 2)
             {
-                guardar_archivo();
+                guardar_archivo(tokens[1], memoria);
             }
             else
             {
