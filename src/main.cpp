@@ -108,7 +108,7 @@ int main()
         {
             if (index == 2)
             {
-                enmascarar_subsecuencia();
+                enmascarar_subsecuencia(tokens[1], memoria);
             }
             else
             {
