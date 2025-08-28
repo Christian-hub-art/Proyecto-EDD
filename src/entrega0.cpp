@@ -64,25 +64,52 @@ void cargar_archivo(const string &nombreArchivo, vector<Secuencia> &memoria)
   }
 }
 
-void listar_secuencias(const vector<Secuencia> &memoria)
-{
-  if (memoria.empty())
-  {
-    cout << "(no hay secuencias cargadas) No hay secuencias cargadas en memoria." << endl;
-    return;
-  }
+void listar_secuencias(const vector<Secuencia>& memoria){
+    if (memoria.empty()) {
+        cout << "(no hay secuencias cargadas) No hay secuencias cargadas en memoria." << endl;
+        return;
+    }
 
-  cout << "resultado exitoso Hay " << memoria.size()
-       << " secuencias cargadas en memoria:" << endl;
+    cout << "resultado exitoso Hay " << memoria.size() 
+         << " secuencias cargadas en memoria:" << endl;
 
-  for (size_t i = 0; i < memoria.size(); i++)
-  {
-    cout << "Secuencia " << memoria[i].getNombre()
-         << " contiene " << memoria[i].getDatos().size() // TODO: corregir porque hay que contar la cantidad de caracteres diferentes
-         << " bases." << endl;
-    //cout << memoria[i].getCantidadPorLinea() << " bases por linea." << endl;
-  }
+    for (size_t i = 0; i < memoria.size(); i++) {
+        cout << "Secuencia " << memoria[i].getNombre();
+	
+	bool encontrar = false;
+	vector < char > aux;
+
+	for(int j = 0; j < memoria[i].getDatos().size(); j++){
+ 		char letra = memoria[i].getDatos()[j];
+		if(letra == '-'){
+		encontrar = true;
+		continue;
+		}
+	
+ 	
+		bool encontrar2 = false;
+
+		for(int z = 0; z < aux.size(); z++){
+			if(aux[z] == letra){
+			encontrar2 = true;
+			break;
+			}		
+		} 	
+	
+		if(!encontrar2){
+		aux.push_back(letra);
+		}
+	}
+
+	if(!encontrar){
+	cout<<" tiene "<<aux.size()<<" bases."<<endl;
+	}else{
+	cout<<" tiene al menos "<<aux.size()<<" bases."<<endl;
+	}
+
+    }
 }
+
 
 void histograma_secuencia(const string secuencia, vector<Secuencia> &memoria)
 {
