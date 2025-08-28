@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
-
+#include "Secuencia.cpp"
 using namespace std;
 
 void cargar_archivo(const string &nombreArchivo, vector<Secuencia> &memoria)
