@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include "Secuencia.h"
+#include "entrega0.cpp"
 
 using namespace std;
 
