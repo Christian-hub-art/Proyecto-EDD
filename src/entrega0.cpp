@@ -35,7 +35,7 @@ void cargar_archivo(const string &nombreArchivo, vector<Secuencia> &memoria)
         nombreActual = linea.substr(1);
         memoria.push_back({nombreActual});
         datosActual.clear();
-        nombreActual.clear();
+        
       }
     }
     else
