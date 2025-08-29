@@ -1,4 +1,4 @@
-#include "entrega0.h"
+#include "Sistema.h"
 #include <cstring>
 #include <iostream>
 #include <stdlib.h>
