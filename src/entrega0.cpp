@@ -155,7 +155,7 @@ void histograma_secuencia(const string secuencia, vector<Secuencia> &memoria)
     cout << codigo[i] << " : " << conteo[i] << endl;
   }
 
-  cout << "Comando ejecutado\n";
+  
 }
 
 bool comparar_caracteres(char subsecuencia_char, char secuencia_char)
@@ -274,7 +274,7 @@ void es_subsecuencia(const string subsecuencia, vector<Secuencia> &memoria)
   }
 
 
-  cout << "Comando ejecutado\n";
+  
 }
 
 void enmascarar_subsecuencia(const string subsecuencia, vector <Secuencia>& memoria)
@@ -325,7 +325,7 @@ void guardar_archivo(const string &nombreArchivo, const vector<Secuencia> &memor
   }
 
   archivo_salida.close();
-  cout << "Comando ejecutado\n";
+  
 }
 
 void codificar_archivo()
