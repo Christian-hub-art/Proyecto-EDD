@@ -133,8 +133,7 @@ int main()
         {
             if (index == 2)
             {
-                ArbolHuffman arbol;
-                arbol.codificarArchivo(tokens[1], memoria);
+                codificar_archivo(tokens[1], memoria);
             }
             else
             {
@@ -145,8 +144,7 @@ int main()
         {
             if (index == 2)
             {
-                ArbolHuffman arbol;
-                arbol.decodificarArchivo(tokens[1], memoria);
+                decodificar_archivo(tokens[1], memoria);
             }
             else
             {
