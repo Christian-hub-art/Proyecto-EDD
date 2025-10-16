@@ -11,7 +11,6 @@ using namespace std;
 
 void cargar_archivo(const string &nombreArchivo, vector<Secuencia> &memoria)
 {
-    cout << "Comando ejecutado\n";
     ifstream archivo(nombreArchivo);
 
     if (!archivo.is_open()) {
@@ -70,6 +69,9 @@ void cargar_archivo(const string &nombreArchivo, vector<Secuencia> &memoria)
                     memoria.back().setCantidadPorLinea(linea.size());
                 }
                 datosActual += linea;
+            }else{
+              memoria.pop_back();
+              datosActual.clear();
             }
         }
     }
