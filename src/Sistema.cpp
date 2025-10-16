@@ -16,7 +16,7 @@ void cargar_archivo(const string &nombreArchivo, vector<Secuencia> &memoria)
 
   if (!archivo.is_open())
   {
-    cout << nombreArchivo << " no se encuentra o no puede leerse." << endl;
+    cout << nombreArchivo << " No se encuentra o no puede leerse." << endl;
     return;
   }
 
@@ -330,6 +330,8 @@ void guardar_archivo(const string &nombreArchivo, const vector<Secuencia> &memor
 
 void codificar_archivo()
 {
+  
+  
   cout << "Comando ejecutado\n";
 }
 

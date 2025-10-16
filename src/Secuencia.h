@@ -15,6 +15,17 @@ public:
         datos = "";
         cantidad_por_linea = 0;
     }
+    Secuencia(const string&nom, const string& data ){
+        nombre = nom;
+        datos = data;
+        int contador = 0;
+        for (int i = 0; i < data.length(); i++) {
+        contador++;
+        }
+        cantidad_por_linea = contador;
+    }
+   
+
     string getNombre() const;
     void setNombre(const string& nom);
     string getDatos() const;
