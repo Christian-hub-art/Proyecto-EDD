@@ -6,216 +6,251 @@
 #include <string>
 #include <vector>
 #include <fstream>
-#include "ArbolHuffman.h"
-#include <bitset>
-#include <cstdint>
 
 using namespace std;
 
 void cargar_archivo(const string &nombreArchivo, vector<Secuencia> &memoria)
 {
-    ifstream archivo(nombreArchivo);
+  cout << "Comando ejecutado\n";
+  ifstream archivo(nombreArchivo);
 
-    if (!archivo.is_open()) {
-        cout << nombreArchivo << " no se encuentra o no puede leerse." << endl;
-        return;
+  if (!archivo.is_open())
+  {
+    cout << nombreArchivo << " No se encuentra o no puede leerse." << endl;
+    return;
+  }
+
+  memoria.clear(); // sobrescribir lo que había antes
+
+  string linea, nombreActual, datosActual;
+  while (getline(archivo, linea))
+  {
+    if (linea.empty())
+      continue;
+
+    if (linea[0] == '>')
+    {
+      if (nombreActual.empty())
+      {
+        nombreActual = linea.substr(1);
+        memoria.push_back({nombreActual});
+        datosActual.clear();
+        nombreActual.clear();
+      }
     }
-
-    memoria.clear();
-
-    string linea, nombreActual, datosActual;
-    bool secuenciaValida = true;
-    const string caracteresValidos = "ACGTURYKMSWBDHVNX-";
-
-    while (getline(archivo, linea)) {
-        if (linea.empty())
-            continue;
-
-        if (linea[0] == '>') {
-            if (!nombreActual.empty() && secuenciaValida) {
-                memoria.back().setDatos(datosActual);
-            }
-
-            nombreActual = "";
-            for (int i = 1; i < linea.size(); i++) {
-                nombreActual += linea[i];
-            }
-
-            memoria.push_back({nombreActual});
-            datosActual.clear();
-            secuenciaValida = true;
-        } 
-        else {
-            for (char c : linea) {
-                char may = c;
-                if (may >= 'a' && may <= 'z')
-                    may = may - 32;
-
-                bool valido = false;
-                for (int j = 0; j < caracteresValidos.size(); j++) {
-                    if (may == caracteresValidos[j]) {
-                        valido = true;
-                        break;
-                    }
-                }
-
-                if (!valido) {
-                    cout << "Error: secuencia \"" << nombreActual
-                         << "\" contiene símbolo no permitido (" << c << ")." << endl;
-                    secuenciaValida = false;
-                    break;
-                }
-            }
-
-            if (secuenciaValida) {
-                if (datosActual.empty()) {
-                    memoria.back().setCantidadPorLinea(linea.size());
-                }
-                datosActual += linea;
-            }else{
-              memoria.pop_back();
-              datosActual.clear();
-            }
-        }
-    }
-
-    if (!memoria.empty() && secuenciaValida) {
-        memoria.back().setDatos(datosActual);
-    }
-
-    int n = memoria.size();
-    if (n == 0)
-        cout << nombreArchivo << " no contiene ninguna secuencia válida." << endl;
-    else if (n == 1)
-        cout << "1 secuencia cargada correctamente desde " << nombreArchivo << "." << endl;
     else
-        cout << n << " secuencias cargadas correctamente desde " << nombreArchivo << "." << endl;
+    {
+      if (datosActual.empty())
+      {
+        memoria.back().setCantidadPorLinea(linea.size());
+      }
+      datosActual += linea;
+      memoria.back().setDatos(datosActual);
+    }
+  }
+
+  int n = memoria.size();
+  if (n == 0)
+  {
+    cout << nombreArchivo << " no contiene ninguna secuencia." << endl;
+  }
+  else if (n == 1)
+  {
+    cout << "1 secuencia cargada correctamente desde " << nombreArchivo << "." << endl;
+  }
+  else
+  {
+    cout << n << " secuencias cargadas correctamente desde " << nombreArchivo << "." << endl;
+  }
 }
 
-
-void listar_secuencias(const vector<Secuencia>& memoria) {
+void listar_secuencias(const vector<Secuencia>& memoria){
     if (memoria.empty()) {
-        cout << "No hay secuencias cargadas en memoria." << endl;
+        cout << "(no hay secuencias cargadas) No hay secuencias cargadas en memoria." << endl;
         return;
     }
 
-    cout << "Hay " << memoria.size() << " secuencias cargadas en memoria:" << endl;
+    cout << "resultado exitoso Hay " << memoria.size() 
+         << " secuencias cargadas en memoria:" << endl;
 
     for (size_t i = 0; i < memoria.size(); i++) {
-        const string& datos = memoria[i].getDatos();
-        bool incompleta = false;
-        int conteo = 0;
+        cout << "Secuencia " << memoria[i].getNombre();
+	
+	bool encontrar = false;
+	vector < char > aux;
 
-        for (char base : datos) {
-            if (base == '-') {
-                incompleta = true;
-            } else {
-                conteo++;
-            }
-        }
+	for(int j = 0; j < memoria[i].getDatos().size(); j++){
+ 		char letra = memoria[i].getDatos()[j];
+		if(letra == '-'){
+		encontrar = true;
+		continue;
+		}
+	
+ 	
+		bool encontrar2 = false;
 
-        if (incompleta)
-            cout << "Secuencia " << memoria[i].getNombre() 
-                 << " contiene al menos " << conteo << " bases." << endl;
-        else
-            cout << "Secuencia " << memoria[i].getNombre() 
-                 << " contiene " << conteo << " bases." << endl;
+		for(int z = 0; z < aux.size(); z++){
+			if(aux[z] == letra){
+			encontrar2 = true;
+			break;
+			}		
+		} 	
+	
+		if(!encontrar2){
+		aux.push_back(letra);
+		}
+	}
+
+	if(!encontrar){
+	cout<<" tiene "<<aux.size()<<" bases."<<endl;
+	}else{
+	cout<<" tiene al menos "<<aux.size()<<" bases."<<endl;
+	}
+
     }
-}
-
-
-
-int indiceBase(char base) {
-    const string codigo = "ACGTURYKMSWBDHVNX-"; 
-    if (base >= 'a' && base <= 'z')
-        base = base - 32;
-
-    for (int i = 0; i < codigo.size(); i++) {
-        if (codigo[i] == base)
-            return i;
-    }
-    return -1;
 }
 
 
 void histograma_secuencia(const string secuencia, vector<Secuencia> &memoria)
 {
-    const vector<char> codigo = {'A','C','G','T','U','R','Y','K','M','S','W','B','D','H','V','N','X','-'};
-    vector<int> conteo(codigo.size(), 0);
 
-    bool existente = false;
-    Secuencia sec_temp = Secuencia("");
+  vector<char> codigo = {'A', 'C', 'G', 'T', 'U', 'R', 'Y', 'K', 'M', 'S', 'W', 'B', 'D', 'H', 'V', 'N', 'X', '-'};
 
-    for (const auto &s : memoria) {
-        if (s.getNombre() == secuencia) {
-            sec_temp = s;
-            existente = true;
-            break;
-        }
+  vector<int> conteo(codigo.size(), 0);
+
+  bool existente = false;
+
+  Secuencia sec_temp = Secuencia("");
+  for (int i = 0; i < memoria.size(); i++)
+  {
+    if (secuencia == memoria[i].getNombre())
+    {
+      sec_temp = memoria[i];
+      existente = true;
+      break;
     }
+  }
 
-    if (!existente) {
-        cout << "Secuencia inválida." << endl;
-        return;
-    }
+  if (!existente)
+  {
+    cout << "La secuencia no existe\n";
+    return;
+  }
 
-    const string &datos = sec_temp.getDatos();
-    for (int i = 0; i < datos.size(); i++) {
-        int idx = indiceBase(datos[i]);
-        if (idx != -1) conteo[idx]++;
+  for (int i = 0; i < sec_temp.getDatos().size(); i++)
+  {
+    char letra = sec_temp.getDatos()[i];
+    for (int j = 0; j < codigo.size(); j++)
+    {
+      if (letra == codigo[j])
+      {
+        conteo[j]++;
+        break;
+      }
     }
+  }
 
-    for (int i = 0; i < codigo.size(); i++) {
-        if (conteo[i] > 0)
-            cout << codigo[i] << " : " << conteo[i] << endl;
-    }
+  for (int i = 0; i < codigo.size(); i++)
+  {
+    cout << codigo[i] << " : " << conteo[i] << endl;
+  }
+
+  
 }
 
-
-bool comparar_caracteres(char a, char b)
+bool comparar_caracteres(char subsecuencia_char, char secuencia_char)
 {
-    if (a == b)
-        return true;
+  subsecuencia_char = toupper(subsecuencia_char);
+  secuencia_char = toupper(secuencia_char);
 
-    if ((a >= 'A' && a <= 'Z' && a + 32 == b) ||
-        (a >= 'a' && a <= 'z' && a - 32 == b))
-        return true;
+  // Si los caracteres son iguales, hay una coincidencia
+  if (subsecuencia_char == secuencia_char)
+  {
+    return true;
+  }
 
-    return false;
+  // Lógica para las bases especiales usando if/else if
+  if (secuencia_char == 'R')
+  {
+    if (subsecuencia_char == 'A' || subsecuencia_char == 'G')
+      return true;
+  }
+  else if (secuencia_char == 'Y')
+  {
+    if (subsecuencia_char == 'C' || subsecuencia_char == 'T' || subsecuencia_char == 'U')
+      return true;
+  }
+  else if (secuencia_char == 'K')
+  {
+    if (subsecuencia_char == 'G' || subsecuencia_char == 'T' || subsecuencia_char == 'U')
+      return true;
+  }
+  else if (secuencia_char == 'M')
+  {
+    if (subsecuencia_char == 'A' || subsecuencia_char == 'C')
+      return true;
+  }
+  else if (secuencia_char == 'S')
+  {
+    if (subsecuencia_char == 'C' || subsecuencia_char == 'G')
+      return true;
+  }
+  else if (secuencia_char == 'W')
+  {
+    if (subsecuencia_char == 'A' || subsecuencia_char == 'T' || subsecuencia_char == 'U')
+      return true;
+  }
+  else if (secuencia_char == 'B')
+  {
+    if (subsecuencia_char == 'C' || subsecuencia_char == 'G' || subsecuencia_char == 'T' || subsecuencia_char == 'U')
+      return true;
+  }
+  else if (secuencia_char == 'D')
+  {
+    if (subsecuencia_char == 'A' || subsecuencia_char == 'G' || subsecuencia_char == 'T' || subsecuencia_char == 'U')
+      return true;
+  }
+  else if (secuencia_char == 'H')
+  {
+    if (subsecuencia_char == 'A' || subsecuencia_char == 'C' || subsecuencia_char == 'T' || subsecuencia_char == 'U')
+      return true;
+  }
+  else if (secuencia_char == 'V')
+  {
+    if (subsecuencia_char == 'A' || subsecuencia_char == 'C' || subsecuencia_char == 'G')
+      return true;
+  }
+  else if (secuencia_char == 'N')
+  {
+    if (subsecuencia_char == 'A' || subsecuencia_char == 'C' || subsecuencia_char == 'G' || subsecuencia_char == 'T' || subsecuencia_char == 'U')
+      return true;
+  }
+
+  return false;
 }
 
-vector<vector<int>> inicios_subsecuencia(const string& subsecuencia, const vector<Secuencia>& memoria)
-{
-    vector<vector<int>> resultados(memoria.size());
-
-    if (subsecuencia.empty()) return resultados;
-
-    for (size_t i = 0; i < memoria.size(); i++) {
-        const Secuencia& sec = memoria[i];
-        const string& datos = sec.getDatos();
-
-        if (datos.size() < subsecuencia.size()) continue;
-
-        for (size_t j = 0; j <= datos.size() - subsecuencia.size(); j++) {
-            bool coincide = true;
-
-            for (size_t k = 0; k < subsecuencia.size(); k++) {
-                if (!comparar_caracteres(subsecuencia[k], datos[j + k])) {
-                    coincide = false;
-                    break;
-                }
-            }
-
-            if (coincide) {
-                resultados[i].push_back(static_cast<int>(j));
-            }
+vector <vector<int>> inicios_subsecuencia(const string& subsecuencia, const vector<Secuencia>& memoria){
+  vector < vector <int>> resultados( memoria.size());
+  bool es_subsecuencia; 
+  for (int num_sec = 0; num_sec < memoria.size(); num_sec++){
+    Secuencia sec = memoria[num_sec];
+    for(int i=0 ; i<sec.getDatos().size() - subsecuencia.length()+1; i++){
+       es_subsecuencia = true; 
+      for( int j= 0; j< subsecuencia.length(); j++){
+        if( !comparar_caracteres(subsecuencia[j] ,sec.getDatos()[i+j]) )
+        {
+          es_subsecuencia = false;
+          break;
         }
+      }
+      if(es_subsecuencia){
+        resultados[num_sec].push_back(i);
+      }
     }
+  }
 
-    return resultados;
+  return resultados;
 }
-
-
 
 void es_subsecuencia(const string subsecuencia, vector<Secuencia> &memoria)
 {
@@ -233,9 +268,9 @@ void es_subsecuencia(const string subsecuencia, vector<Secuencia> &memoria)
   }
 
   if( conteo == 0){
-    cout <<  "La subsecuencia dada no existe dentro de las secuencias cargadas en memoria.\n";
+    cout <<  "La subsecuencia dada no existe dentro de las secuencias cargadas en memoria.";
   }else{
-    cout << "La subsecuencia dada existe "<< conteo << " veces dentro de las secuencias cargadas en memoria.\n";
+    cout << "La subsecuencia dada existe "<< conteo << " veces dentro de las secuencias cargadas en memoria.";
   }
 
 
@@ -263,16 +298,16 @@ void enmascarar_subsecuencia(const string subsecuencia, vector <Secuencia>& memo
   }
 
   if( conteo == 0){
-    cout <<  "La subsecuencia dada no existe dentro de las secuencias cargadas en memoria, por tanto no se enmascara nada.\n";
+    cout <<  "La subsecuencia dada no existe dentro de las secuencias cargadas en memoria, por tanto no se enmascara nada.";
   }else{
-    cout << conteo << " subsecuencias han sido enmascaradas dentro de las secuencias cargadas en memoria.\n";
+    cout << conteo << " subsecuencias han sido enmascaradas dentro de las secuencias cargadas en memoria.";
   }
 }
 
 void guardar_archivo(const string &nombreArchivo, const vector<Secuencia> &memoria)
 {
 
-  ofstream archivo_salida(nombreArchivo);
+  std::ofstream archivo_salida(nombreArchivo);
 
   if (!archivo_salida)
   {
@@ -293,233 +328,16 @@ void guardar_archivo(const string &nombreArchivo, const vector<Secuencia> &memor
   
 }
 
-void codificar_archivo(const string& nombreArchivo, const vector<Secuencia>& memoria) {
-    // --- PASO 1: Validar que hay secuencias en memoria ---
-    if (memoria.empty()) {
-        std::cout << "(no hay secuencias cargadas) No hay secuencias cargadas en memoria." << std::endl;
-        return;
-    }
-
-    // --- PASO 2: Calcular la tabla de frecuencias ---
-    std::map<char, int> mapaFrecuencias;
-    for (const Secuencia& seq : memoria) {
-        for (char base : seq.getDatos()) {
-            mapaFrecuencias[base]++;
-        }
-    }
-
-    // --- PASO 3: Construir el árbol y generar los códigos ---
-    ArbolHuffman arbol;
-    arbol.construirDesdeFrecuencias(mapaFrecuencias);
-   
-
-    std::map<char, std::string> codigos;
-     arbol.generarCodigo(arbol.obtenerRaiz(), "", codigos);
-
-    // --- PASO 4: Abrir el archivo de salida en modo binario ---
-    std::ofstream archivoSalida(nombreArchivo, std::ios::binary);
-    if (!archivoSalida.is_open()) {
-        std::cout << "(mensaje de error) No se pueden guardar las secuencias cargadas en " << nombreArchivo << "." << std::endl;
-        return;
-    }
-
-    // --- PASO 5: Escribir la cabecera del archivo .fabin ---
-    
-    // n: Cantidad de bases diferentes (2 bytes) [cite: 182]
-    short n_bases = mapaFrecuencias.size();
-    archivoSalida.write(reinterpret_cast<const char*>(&n_bases), sizeof(short));
-
-    // Tabla de frecuencias: n veces (c_i, f_i) [cite: 183]
-    // c_i: Código de la base (1 byte)
-    // f_i: Frecuencia (8 bytes, usamos long long para asegurar)
-    for (const auto& par : mapaFrecuencias) {
-        char caracter = par.first;
-        long long frecuencia = par.second;
-        archivoSalida.write(&caracter, sizeof(char));
-        archivoSalida.write(reinterpret_cast<const char*>(&frecuencia), sizeof(long long));
-    }
-
-    // ns: Cantidad de secuencias (4 bytes) [cite: 184]
-    int ns = memoria.size();
-    archivoSalida.write(reinterpret_cast<const char*>(&ns), sizeof(int));
-    
-    // --- PASO 6: Escribir los datos de cada secuencia ---
-    for (const Secuencia& seq : memoria) {
-        // li: Tamaño del nombre (2 bytes) [cite: 185]
-        short nombreLen = seq.getNombre().length();
-        archivoSalida.write(reinterpret_cast<const char*>(&nombreLen), sizeof(short));
-
-        // sij: Caracteres del nombre [cite: 186]
-        archivoSalida.write(seq.getNombre().c_str(), nombreLen);
-
-        // wi: Longitud de la secuencia (8 bytes) [cite: 187]
-        long long secuenciaLen = seq.getDatos().length();
-        archivoSalida.write(reinterpret_cast<const char*>(&secuenciaLen), sizeof(long long));
-        
-        // xi: Justificación (ancho de línea) (2 bytes) [cite: 188]
-        short justificacion = seq.getCantidadPorLinea(); // Necesitarás este método en tu clase Secuencia
-        archivoSalida.write(reinterpret_cast<const char*>(&justificacion), sizeof(short));
-        
-        // binary_code: La secuencia codificada [cite: 189]
-        std::string bufferBits = "";
-        for (char base : seq.getDatos()) {
-            bufferBits += codigos[base];
-        }
-
-        // --- Manejo de bits y padding ---
-        unsigned char byte = 0;
-        int bitCount = 0;
-        for (char bit : bufferBits) {
-            byte = (byte << 1) | (bit - '0');
-            bitCount++;
-            if (bitCount == 8) {
-                archivoSalida.write(reinterpret_cast<const char*>(&byte), sizeof(unsigned char));
-                byte = 0;
-                bitCount = 0;
-            }
-        }
-        // Escribir los bits restantes (padding con ceros a la derecha)
-        if (bitCount > 0) {
-            byte <<= (8 - bitCount);
-            archivoSalida.write(reinterpret_cast<const char*>(&byte), sizeof(unsigned char));
-        }
-    }
-
-    archivoSalida.close();
-    std::cout << "Secuencias codificadas y almacenadas en " << nombreArchivo << "." << std::endl;
+void codificar_archivo()
+{
+  
+  
+  cout << "Comando ejecutado\n";
 }
 
-string codificar(string dato, map<char, string> &codigos) {
-    string encadenado;
-
-    for (int i = 0; i < dato.size(); ++i) {
-        char c = dato[i];
-        encadenado += codigos.at(c);
-    }
-
-    return encadenado;
-}
-
-void decodificar_archivo(const string& nombreArchivo, vector<Secuencia>& memoria) {
-    // --- PASO 1: Validar extensión y abrir el archivo en modo binario ---
-    if (nombreArchivo.length() < 6 || nombreArchivo.substr(nombreArchivo.length() - 6) != ".fabin") {
-        std::cout << "(mensaje de error) No se pueden cargar las secuencias desde " << nombreArchivo << "." << std::endl;
-        return;
-    }
-    std::ifstream archivoEntrada(nombreArchivo, std::ios::binary);
-    if (!archivoEntrada.is_open()) {
-        std::cout << "(mensaje de error) No se pueden cargar las secuencias desde " << nombreArchivo << "." << std::endl;
-        return;
-    }
-
-    // --- PASO 2: Limpiar la memoria actual ---
-    memoria.clear();
-
-    // --- PASO 3: Leer la cabecera del archivo ---
-    
-    // n: Cantidad de bases diferentes (2 bytes)
-    short n_bases;
-    archivoEntrada.read(reinterpret_cast<char*>(&n_bases), sizeof(short));
-    if (archivoEntrada.gcount() != sizeof(short)) { // Verificar que la lectura fue exitosa
-        std::cout << "(mensaje de error) El archivo esta corrupto o tiene un formato invalido." << std::endl;
-        return;
-    }
-
-    // Tabla de frecuencias: n veces (c_i, f_i)
-    std::map<char, int> mapaFrecuencias;
-    for (int i = 0; i < n_bases; ++i) {
-        char caracter;
-        long long frecuencia;
-        archivoEntrada.read(&caracter, sizeof(char));
-        archivoEntrada.read(reinterpret_cast<char*>(&frecuencia), sizeof(long long));
-        mapaFrecuencias[caracter] = static_cast<int>(frecuencia); // Convertir de nuevo a int para tu árbol
-    }
-
-    // --- PASO 4: Reconstruir el árbol de Huffman ---
-    ArbolHuffman arbol;
-    arbol.construirDesdeFrecuencias(mapaFrecuencias);
-
-    // ns: Cantidad de secuencias (4 bytes)
-    int ns;
-    archivoEntrada.read(reinterpret_cast<char*>(&ns), sizeof(int));
-
-    // --- PASO 5: Leer y decodificar cada secuencia ---
-    for (int i = 0; i < ns; ++i) {
-        // li: Tamaño del nombre (2 bytes)
-        short nombreLen;
-        archivoEntrada.read(reinterpret_cast<char*>(&nombreLen), sizeof(short));
-
-        // sij: Caracteres del nombre
-        std::string nombreSecuencia(nombreLen, '\0');
-        archivoEntrada.read(&nombreSecuencia[0], nombreLen);
-
-        // wi: Longitud de la secuencia (8 bytes)
-        long long secuenciaLen;
-        archivoEntrada.read(reinterpret_cast<char*>(&secuenciaLen), sizeof(long long));
-        
-        // xi: Justificación (ancho de línea) (2 bytes)
-        short justificacion;
-        archivoEntrada.read(reinterpret_cast<char*>(&justificacion), sizeof(short));
-
-        // --- Decodificar el binary_code ---
-        std::string contenidoDecodificado = "";
-        Nodo* nodoActual = arbol.obtenerRaiz();
-        
-        // Manejo especial para árboles con un solo nodo
-        if (!nodoActual->obtenerIzq() && !nodoActual->obtenerDer()) {
-             contenidoDecodificado = std::string(secuenciaLen, nodoActual->obtenerDatos());
-             // Hay que "consumir" los bytes del archivo aunque no los usemos
-             long long bytesAvanzar = (secuenciaLen + 7) / 8; // Aproximar al byte superior
-             archivoEntrada.seekg(bytesAvanzar, std::ios_base::cur);
-        } else {
-            unsigned char byte;
-            while (contenidoDecodificado.length() < secuenciaLen && archivoEntrada.read(reinterpret_cast<char*>(&byte), sizeof(byte))) {
-                for (int bit = 7; bit >= 0 && contenidoDecodificado.length() < secuenciaLen; --bit) {
-                    // Moverse en el árbol según el bit
-                    if ((byte >> bit) & 1) {
-                        nodoActual = nodoActual->obtenerDer();
-                    } else {
-                        nodoActual = nodoActual->obtenerIzq();
-                    }
-                    
-                    // Si llegamos a una hoja
-                    if (!nodoActual->obtenerIzq() && !nodoActual->obtenerDer()) {
-                        contenidoDecodificado += nodoActual->obtenerDatos();
-                        nodoActual = arbol.obtenerRaiz(); // Volver a la raíz para el siguiente caracter
-                    }
-                }
-            }
-        }
-        
-        // --- Guardar la secuencia decodificada en memoria ---
-        Secuencia seq(nombreSecuencia, ""); // Crear objeto Secuencia
-        seq.setDatos(contenidoDecodificado);
-        seq.setCantidadPorLinea(justificacion); // Necesitarás este método en tu clase Secuencia
-        memoria.push_back(seq);
-    }
-
-    archivoEntrada.close();
-    std::cout << "Secuencias decodificadas desde " << nombreArchivo << " y cargadas en memoria." << std::endl;
-}
-
-string decodificar(string bits, ArbolHuffman &arbol) {
-
-    string resultado;
-    Nodo* actual = arbol.obtenerRaiz();
-
-    for ( int i = 0; i < bits.size(); ++i) {
-        char bit = bits[i];
-        if (bit == '0')
-            actual = actual->obtenerIzq();
-        else
-            actual = actual->obtenerDer();
-        if (actual->obtenerIzq() == nullptr && actual->obtenerDer() == nullptr) {
-            resultado += actual->obtenerDatos();
-            actual = arbol.obtenerRaiz();
-    }
-    }
-
-    return resultado;
+void decodificar_archivo()
+{
+  cout << "Comando ejecutado\n";
 }
 
 void ruta_mas_corta()
