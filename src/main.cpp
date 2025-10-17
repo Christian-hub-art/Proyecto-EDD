@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 #include "Secuencia.h"
-#include "ArbolHuffman.h"
+
 
 
 
@@ -133,8 +133,7 @@ int main()
         {
             if (index == 2)
             {
-                ArbolHuffman arbol;
-                arbol.codificarArchivo(tokens[1], memoria);
+                codificarArchivo(tokens[1], memoria);
             }
             else
             {
@@ -145,8 +144,7 @@ int main()
         {
             if (index == 2)
             {
-                ArbolHuffman arbol;
-                arbol.decodificarArchivo(tokens[1], memoria);
+                decodificarArchivo(tokens[1], memoria);
             }
             else
             {

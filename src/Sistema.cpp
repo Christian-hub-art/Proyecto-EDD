@@ -6,8 +6,13 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <cstdint>
+#include <bitset>
+#include "ArbolHuffman.h"
 
 using namespace std;
+
+
 
 void cargar_archivo(const string &nombreArchivo, vector<Secuencia> &memoria)
 {
@@ -328,16 +333,151 @@ void guardar_archivo(const string &nombreArchivo, const vector<Secuencia> &memor
   
 }
 
-void codificar_archivo()
-{
-  
-  
-  cout << "Comando ejecutado\n";
+
+
+
+void codificarArchivo(const string& nombreArchivo, const vector<Secuencia>& memoria){
+  ArbolHuffman arbol;
+  map<char, int> frecuencias;
+    for (const Secuencia& secuencia : memoria) {
+        const string& datos = secuencia.getDatos();
+        for (size_t i = 0; i < datos.size(); ++i) {
+            char c = datos[i];
+            frecuencias[c]++;
+        }
+    }
+
+    
+    arbol.Arbol(frecuencias);             
+    map<char, string> codigos;
+    arbol.generarCodigo(arbol.obtenerRaiz(), "", codigos);
+
+    ofstream salida(nombreArchivo, ios::binary);
+    if (!salida.is_open()) {
+        cerr << "Error al crear archivo binario\n";
+        return;
+    }
+
+    
+    uint16_t n = frecuencias.size();
+    salida.write(reinterpret_cast<char*>(&n), sizeof(uint16_t));
+
+    for (const pair<const char, int>& par : frecuencias) {
+        unsigned char c = par.first;
+        uint64_t f = par.second;
+        salida.write(reinterpret_cast<char*>(&c), sizeof(unsigned char));
+        salida.write(reinterpret_cast<char*>(&f), sizeof(uint64_t));
+    }
+
+    
+    uint32_t ns = memoria.size();
+    salida.write(reinterpret_cast<char*>(&ns), sizeof(uint32_t));
+
+    
+    for (const Secuencia& seq : memoria) {
+        const string& nombre = seq.getNombre();
+        const string& datos = seq.getDatos();
+        int ancho = seq.getCantidadPorLinea();
+        uint16_t li = nombre.size();
+        salida.write(reinterpret_cast<char*>(&li), sizeof(uint16_t));
+        salida.write(nombre.c_str(), li);
+
+        uint32_t wi = static_cast<uint32_t>(datos.size());
+        int xi = ancho;
+        salida.write(reinterpret_cast<char*>(&wi), sizeof(uint32_t));
+        salida.write(reinterpret_cast<char*>(&xi), sizeof(int));
+
+        // Codificar datos con Huffman
+        string bits = arbol.codificar(datos, codigos);
+
+        // Guardar tamaño real de bits
+        uint64_t bitLength = bits.size();
+        salida.write(reinterpret_cast<char*>(&bitLength), sizeof(uint64_t));
+
+        // Rellenar con ceros hasta múltiplo de 8
+        while (bits.size() % 8 != 0)
+            bits += '0';
+
+        // Convertir bits a bytes
+        for (size_t i = 0; i < bits.size(); i += 8) {
+            bitset<8> byte(bits.substr(i, 8));
+            unsigned char b = static_cast<unsigned char>(byte.to_ulong());
+            salida.write(reinterpret_cast<char*>(&b), sizeof(unsigned char));
+        }
+    }
+
+    salida.close();
+    cout << " Archivo codificado correctamente: " << nombreArchivo << "\n";
 }
 
-void decodificar_archivo()
-{
-  cout << "Comando ejecutado\n";
+void decodificarArchivo(const string& archivoEntrada, vector<Secuencia>& memoria){
+  ArbolHuffman arbol;
+  ifstream entrada(archivoEntrada, ios::binary);
+    if (!entrada.is_open()) {
+        cerr << "No se puede abrir el archivo .fabin\n";
+        return;
+    }
+
+    memoria.clear();
+
+    
+    uint16_t n;
+    entrada.read(reinterpret_cast<char*>(&n), sizeof(uint16_t));
+
+    map<char, int> frecuencias;
+    for (int i = 0; i < n; i++) {
+        unsigned char c;
+        uint64_t f;
+        entrada.read(reinterpret_cast<char*>(&c), sizeof(unsigned char));
+        entrada.read(reinterpret_cast<char*>(&f), sizeof(uint64_t));
+        frecuencias[c] = f;
+    }
+
+    
+    arbol.Arbol(frecuencias);
+
+    
+    uint32_t ns;
+    entrada.read(reinterpret_cast<char*>(&ns), sizeof(uint32_t));
+
+   
+    for (uint32_t i = 0; i < ns; i++) {
+        // Nombre
+        uint16_t li;
+        entrada.read(reinterpret_cast<char*>(&li), sizeof(uint16_t));
+        string nombre(li, '\0');
+        entrada.read(&nombre[0], li);
+        uint32_t wi;
+        int xi;
+        entrada.read(reinterpret_cast<char*>(&wi), sizeof(uint32_t));
+        entrada.read(reinterpret_cast<char*>(&xi), sizeof(int));
+
+        // Longitud de bits
+        uint64_t bitLength;
+        entrada.read(reinterpret_cast<char*>(&bitLength), sizeof(uint64_t));
+
+        // Calcular bytes necesarios
+        size_t totalBytes = (bitLength + 7) / 8;
+
+        // Leer esos bytes y convertirlos a bits
+        string bits;
+        bits.reserve(totalBytes * 8);
+        for (size_t j = 0; j < totalBytes; ++j) {
+            unsigned char byte;
+            entrada.read(reinterpret_cast<char*>(&byte), sizeof(unsigned char));
+            bitset<8> b(byte);
+            bits += b.to_string();
+        }
+
+        // Decodificar exactamente bitLength bits
+        string contenido = arbol.decodificar(bits.substr(0, bitLength));
+
+        // Guardar en memoria
+        memoria.push_back(Secuencia(nombre, contenido));
+    }
+
+    entrada.close();
+    cout << " Archivo decodificado correctamente.\n";
 }
 
 void ruta_mas_corta()
