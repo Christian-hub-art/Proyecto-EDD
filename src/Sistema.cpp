@@ -380,12 +380,18 @@ string codificar(string dato, map<char, string> &codigos) {
 }
 
 void decodificar_archivo(const string& archivoEntrada, vector<Secuencia>& memoria) {
+
+    if (archivoEntrada.length() < 6 || archivoEntrada.substr(archivoEntrada.length() - 6) != ".fabin") {
+        cerr << "Error: El archivo para decodificar debe tener la extension .fabin\n";
+        return; 
+    }
+
     ifstream entrada(archivoEntrada, ios::binary);
     if (!entrada.is_open()) {
         cerr << "No se puede abrir el archivo .fabin\n";
         return;
     }
-
+    std::cout << "-> Archivo " << archivoEntrada << " abierto correctamente en modo binario." << std::endl;
     memoria.clear();
 
     
@@ -439,9 +445,10 @@ void decodificar_archivo(const string& archivoEntrada, vector<Secuencia>& memori
 
         // Decodificar exactamente bitLength bits
         string contenido = decodificar(bits.substr(0, bitLength), arbol);
-
+        cout<< "Secuencia " << nombre << " guardando correctamente.\n";
         // Guardar en memoria
         memoria.push_back(Secuencia(nombre, contenido));
+        cout<< "Secuencia " << nombre << " guardada correctamente.\n";
     }
 
     entrada.close();
