@@ -17,13 +17,18 @@ public:
 class ArbolHuffman{
     protected:
     Nodo *raiz;
+    std::map<char, std::string> codigos;
     public:
-    ArbolHuffman(map<char,int> tablafrecuenia);
+    ArbolHuffman();
     ~ArbolHuffman();
     Nodo* obtenerRaiz();
     void fijarRaiz(Nodo *nodo);
     void generarCodigo(Nodo *nodo,string codigo, map<char,string> &codigos);
+    void construirDesdeFrecuencias(map<char,int> tablafrecuenia);
     bool esVacio();
+
+    
+    void imprimirCodigosDeDepuracion();
 };
 
 
