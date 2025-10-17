@@ -16,246 +16,212 @@ using namespace std;
 
 void cargar_archivo(const string &nombreArchivo, vector<Secuencia> &memoria)
 {
-  cout << "Comando ejecutado\n";
-  ifstream archivo(nombreArchivo);
+    ifstream archivo(nombreArchivo);
 
-  if (!archivo.is_open())
-  {
-    cout << nombreArchivo << " No se encuentra o no puede leerse." << endl;
-    return;
-  }
-
-  memoria.clear(); // sobrescribir lo que había antes
-
-  string linea, nombreActual, datosActual;
-  while (getline(archivo, linea))
-  {
-    if (linea.empty())
-      continue;
-
-    if (linea[0] == '>')
-    {
-      if (nombreActual.empty())
-      {
-        nombreActual = linea.substr(1);
-        memoria.push_back({nombreActual});
-        datosActual.clear();
-        nombreActual.clear();
-      }
-    }
-    else
-    {
-      if (datosActual.empty())
-      {
-        memoria.back().setCantidadPorLinea(linea.size());
-      }
-      datosActual += linea;
-      memoria.back().setDatos(datosActual);
-    }
-  }
-
-  int n = memoria.size();
-  if (n == 0)
-  {
-    cout << nombreArchivo << " no contiene ninguna secuencia." << endl;
-  }
-  else if (n == 1)
-  {
-    cout << "1 secuencia cargada correctamente desde " << nombreArchivo << "." << endl;
-  }
-  else
-  {
-    cout << n << " secuencias cargadas correctamente desde " << nombreArchivo << "." << endl;
-  }
-}
-
-void listar_secuencias(const vector<Secuencia>& memoria){
-    if (memoria.empty()) {
-        cout << "(no hay secuencias cargadas) No hay secuencias cargadas en memoria." << endl;
+    if (!archivo.is_open()) {
+        cout << nombreArchivo << " no se encuentra o no puede leerse." << endl;
         return;
     }
 
-    cout << "resultado exitoso Hay " << memoria.size() 
-         << " secuencias cargadas en memoria:" << endl;
+    memoria.clear();
+
+    string linea, nombreActual, datosActual;
+    bool secuenciaValida = true;
+    int cantidadPorLineaActual = 0;
+    const string caracteresValidos = "ACGTURYKMSWBDHVNX-";
+
+    while (getline(archivo, linea)) {
+        if (linea.empty())
+            continue;
+
+        if (linea[0] == '>') {
+            // Guardar la secuencia anterior si era válida
+            if (!nombreActual.empty() && secuenciaValida) {
+                Secuencia seq(nombreActual);
+                seq.setDatos(datosActual);
+                seq.setCantidadPorLinea(cantidadPorLineaActual);
+                memoria.push_back(seq);
+            }
+
+            nombreActual = linea.substr(1); 
+            datosActual.clear();
+            cantidadPorLineaActual = 0;
+            secuenciaValida = true;
+        } 
+        else {
+          if (!secuenciaValida) {
+                continue; // Saltar las líneas de una secuencia ya marcada como inválida
+          }
+        
+            for (char c : linea) {
+                char may = c;
+                if (may >= 'a' && may <= 'z')
+                    may = may - 32;
+
+                bool valido = false;
+                for (int j = 0; j < caracteresValidos.size(); j++) {
+                    if (may == caracteresValidos[j]) {
+                        valido = true;
+                        break;
+                    }
+                }
+
+                if (!valido) {
+                    cout << "Error: secuencia \"" << nombreActual
+                         << "\" contiene símbolo no permitido (" << c << ")." << endl;
+                    secuenciaValida = false;
+                    break;
+                }
+            }
+          if (secuenciaValida) {
+            if (datosActual.empty()) {
+                cantidadPorLineaActual = linea.length();
+            }
+            datosActual += linea; // Acumular los datos de la secuencia
+          }
+        }
+    }
+
+    if (!nombreActual.empty() && secuenciaValida) {
+        Secuencia seq(nombreActual);
+        seq.setDatos(datosActual);
+        seq.setCantidadPorLinea(cantidadPorLineaActual);
+        memoria.push_back(seq);
+    }
+
+    int n = memoria.size();
+    if (n == 0)
+        cout << nombreArchivo << " no contiene ninguna secuencia válida." << endl;
+    else if (n == 1)
+        cout << "1 secuencia cargada correctamente desde " << nombreArchivo << "." << endl;
+    else
+        cout << n << " secuencias cargadas correctamente desde " << nombreArchivo << "." << endl;
+}
+
+
+void listar_secuencias(const vector<Secuencia>& memoria) {
+    if (memoria.empty()) {
+        cout << "No hay secuencias cargadas en memoria." << endl;
+        return;
+    }
+
+    cout << "Hay " << memoria.size() << " secuencias cargadas en memoria:" << endl;
 
     for (size_t i = 0; i < memoria.size(); i++) {
-        cout << "Secuencia " << memoria[i].getNombre();
-	
-	bool encontrar = false;
-	vector < char > aux;
+        const string& datos = memoria[i].getDatos();
+        bool incompleta = false;
+        int conteo = 0;
 
-	for(int j = 0; j < memoria[i].getDatos().size(); j++){
- 		char letra = memoria[i].getDatos()[j];
-		if(letra == '-'){
-		encontrar = true;
-		continue;
-		}
-	
- 	
-		bool encontrar2 = false;
+        for (char base : datos) {
+            if (base == '-') {
+                incompleta = true;
+            } else {
+                conteo++;
+            }
+        }
 
-		for(int z = 0; z < aux.size(); z++){
-			if(aux[z] == letra){
-			encontrar2 = true;
-			break;
-			}		
-		} 	
-	
-		if(!encontrar2){
-		aux.push_back(letra);
-		}
-	}
-
-	if(!encontrar){
-	cout<<" tiene "<<aux.size()<<" bases."<<endl;
-	}else{
-	cout<<" tiene al menos "<<aux.size()<<" bases."<<endl;
-	}
-
+        if (incompleta)
+            cout << "Secuencia " << memoria[i].getNombre() 
+                 << " contiene al menos " << conteo << " bases." << endl;
+        else
+            cout << "Secuencia " << memoria[i].getNombre() 
+                 << " contiene " << conteo << " bases." << endl;
     }
+}
+
+
+
+int indiceBase(char base) {
+    const string codigo = "ACGTURYKMSWBDHVNX-"; 
+    if (base >= 'a' && base <= 'z')
+        base = base - 32;
+
+    for (int i = 0; i < codigo.size(); i++) {
+        if (codigo[i] == base)
+            return i;
+    }
+    return -1;
 }
 
 
 void histograma_secuencia(const string secuencia, vector<Secuencia> &memoria)
 {
+    const vector<char> codigo = {'A','C','G','T','U','R','Y','K','M','S','W','B','D','H','V','N','X','-'};
+    vector<int> conteo(codigo.size(), 0);
 
-  vector<char> codigo = {'A', 'C', 'G', 'T', 'U', 'R', 'Y', 'K', 'M', 'S', 'W', 'B', 'D', 'H', 'V', 'N', 'X', '-'};
+    bool existente = false;
+    Secuencia sec_temp = Secuencia("");
 
-  vector<int> conteo(codigo.size(), 0);
-
-  bool existente = false;
-
-  Secuencia sec_temp = Secuencia("");
-  for (int i = 0; i < memoria.size(); i++)
-  {
-    if (secuencia == memoria[i].getNombre())
-    {
-      sec_temp = memoria[i];
-      existente = true;
-      break;
-    }
-  }
-
-  if (!existente)
-  {
-    cout << "La secuencia no existe\n";
-    return;
-  }
-
-  for (int i = 0; i < sec_temp.getDatos().size(); i++)
-  {
-    char letra = sec_temp.getDatos()[i];
-    for (int j = 0; j < codigo.size(); j++)
-    {
-      if (letra == codigo[j])
-      {
-        conteo[j]++;
-        break;
-      }
-    }
-  }
-
-  for (int i = 0; i < codigo.size(); i++)
-  {
-    cout << codigo[i] << " : " << conteo[i] << endl;
-  }
-
-  
-}
-
-bool comparar_caracteres(char subsecuencia_char, char secuencia_char)
-{
-  subsecuencia_char = toupper(subsecuencia_char);
-  secuencia_char = toupper(secuencia_char);
-
-  // Si los caracteres son iguales, hay una coincidencia
-  if (subsecuencia_char == secuencia_char)
-  {
-    return true;
-  }
-
-  // Lógica para las bases especiales usando if/else if
-  if (secuencia_char == 'R')
-  {
-    if (subsecuencia_char == 'A' || subsecuencia_char == 'G')
-      return true;
-  }
-  else if (secuencia_char == 'Y')
-  {
-    if (subsecuencia_char == 'C' || subsecuencia_char == 'T' || subsecuencia_char == 'U')
-      return true;
-  }
-  else if (secuencia_char == 'K')
-  {
-    if (subsecuencia_char == 'G' || subsecuencia_char == 'T' || subsecuencia_char == 'U')
-      return true;
-  }
-  else if (secuencia_char == 'M')
-  {
-    if (subsecuencia_char == 'A' || subsecuencia_char == 'C')
-      return true;
-  }
-  else if (secuencia_char == 'S')
-  {
-    if (subsecuencia_char == 'C' || subsecuencia_char == 'G')
-      return true;
-  }
-  else if (secuencia_char == 'W')
-  {
-    if (subsecuencia_char == 'A' || subsecuencia_char == 'T' || subsecuencia_char == 'U')
-      return true;
-  }
-  else if (secuencia_char == 'B')
-  {
-    if (subsecuencia_char == 'C' || subsecuencia_char == 'G' || subsecuencia_char == 'T' || subsecuencia_char == 'U')
-      return true;
-  }
-  else if (secuencia_char == 'D')
-  {
-    if (subsecuencia_char == 'A' || subsecuencia_char == 'G' || subsecuencia_char == 'T' || subsecuencia_char == 'U')
-      return true;
-  }
-  else if (secuencia_char == 'H')
-  {
-    if (subsecuencia_char == 'A' || subsecuencia_char == 'C' || subsecuencia_char == 'T' || subsecuencia_char == 'U')
-      return true;
-  }
-  else if (secuencia_char == 'V')
-  {
-    if (subsecuencia_char == 'A' || subsecuencia_char == 'C' || subsecuencia_char == 'G')
-      return true;
-  }
-  else if (secuencia_char == 'N')
-  {
-    if (subsecuencia_char == 'A' || subsecuencia_char == 'C' || subsecuencia_char == 'G' || subsecuencia_char == 'T' || subsecuencia_char == 'U')
-      return true;
-  }
-
-  return false;
-}
-
-vector <vector<int>> inicios_subsecuencia(const string& subsecuencia, const vector<Secuencia>& memoria){
-  vector < vector <int>> resultados( memoria.size());
-  bool es_subsecuencia; 
-  for (int num_sec = 0; num_sec < memoria.size(); num_sec++){
-    Secuencia sec = memoria[num_sec];
-    for(int i=0 ; i<sec.getDatos().size() - subsecuencia.length()+1; i++){
-       es_subsecuencia = true; 
-      for( int j= 0; j< subsecuencia.length(); j++){
-        if( !comparar_caracteres(subsecuencia[j] ,sec.getDatos()[i+j]) )
-        {
-          es_subsecuencia = false;
-          break;
+    for (const auto &s : memoria) {
+        if (s.getNombre() == secuencia) {
+            sec_temp = s;
+            existente = true;
+            break;
         }
-      }
-      if(es_subsecuencia){
-        resultados[num_sec].push_back(i);
-      }
     }
-  }
 
-  return resultados;
+    if (!existente) {
+        cout << "Secuencia inválida." << endl;
+        return;
+    }
+
+    const string &datos = sec_temp.getDatos();
+    for (int i = 0; i < datos.size(); i++) {
+        int idx = indiceBase(datos[i]);
+        if (idx != -1) conteo[idx]++;
+    }
+
+    for (int i = 0; i < codigo.size(); i++) {
+        if (conteo[i] > 0)
+            cout << codigo[i] << " : " << conteo[i] << endl;
+    }
 }
+
+
+bool comparar_caracteres(char a, char b)
+{
+    if (a == b)
+        return true;
+
+    if ((a >= 'A' && a <= 'Z' && a + 32 == b) ||
+        (a >= 'a' && a <= 'z' && a - 32 == b))
+        return true;
+
+    return false;
+}
+
+vector<vector<int>> inicios_subsecuencia(const string& subsecuencia, const vector<Secuencia>& memoria)
+{
+    vector<vector<int>> resultados(memoria.size());
+
+    if (subsecuencia.empty()) return resultados;
+
+    for (size_t i = 0; i < memoria.size(); i++) {
+        const Secuencia& sec = memoria[i];
+        const string& datos = sec.getDatos();
+
+        if (datos.size() < subsecuencia.size()) continue;
+
+        for (size_t j = 0; j <= datos.size() - subsecuencia.size(); j++) {
+            bool coincide = true;
+
+            for (size_t k = 0; k < subsecuencia.size(); k++) {
+                if (!comparar_caracteres(subsecuencia[k], datos[j + k])) {
+                    coincide = false;
+                    break;
+                }
+            }
+
+            if (coincide) {
+                resultados[i].push_back(static_cast<int>(j));
+            }
+        }
+    }
+
+    return resultados;
+}
+
+
 
 void es_subsecuencia(const string subsecuencia, vector<Secuencia> &memoria)
 {
@@ -273,9 +239,9 @@ void es_subsecuencia(const string subsecuencia, vector<Secuencia> &memoria)
   }
 
   if( conteo == 0){
-    cout <<  "La subsecuencia dada no existe dentro de las secuencias cargadas en memoria.";
+    cout <<  "La subsecuencia dada no existe dentro de las secuencias cargadas en memoria.\n";
   }else{
-    cout << "La subsecuencia dada existe "<< conteo << " veces dentro de las secuencias cargadas en memoria.";
+    cout << "La subsecuencia dada existe "<< conteo << " veces dentro de las secuencias cargadas en memoria.\n";
   }
 
 
@@ -303,16 +269,16 @@ void enmascarar_subsecuencia(const string subsecuencia, vector <Secuencia>& memo
   }
 
   if( conteo == 0){
-    cout <<  "La subsecuencia dada no existe dentro de las secuencias cargadas en memoria, por tanto no se enmascara nada.";
+    cout <<  "La subsecuencia dada no existe dentro de las secuencias cargadas en memoria, por tanto no se enmascara nada.\n";
   }else{
-    cout << conteo << " subsecuencias han sido enmascaradas dentro de las secuencias cargadas en memoria.";
+    cout << conteo << " subsecuencias han sido enmascaradas dentro de las secuencias cargadas en memoria.\n";
   }
 }
 
 void guardar_archivo(const string &nombreArchivo, const vector<Secuencia> &memoria)
 {
 
-  std::ofstream archivo_salida(nombreArchivo);
+  ofstream archivo_salida(nombreArchivo);
 
   if (!archivo_salida)
   {
@@ -330,6 +296,7 @@ void guardar_archivo(const string &nombreArchivo, const vector<Secuencia> &memor
   }
 
   archivo_salida.close();
+  cout << "Secuencias guardadas correctamente en " << nombreArchivo << endl;
   
 }
 
