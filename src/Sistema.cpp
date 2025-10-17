@@ -16,11 +16,10 @@ void cargar_archivo(const string &nombreArchivo, vector<Secuencia> &memoria)
 {
     ifstream archivo(nombreArchivo);
 
-  if (!archivo.is_open())
-  {
-    cout << nombreArchivo << " no se encuentra o no puede leerse." << endl;
-    return;
-  }
+    if (!archivo.is_open()) {
+        cout << nombreArchivo << " no se encuentra o no puede leerse." << endl;
+        return;
+    }
 
     memoria.clear();
 
@@ -294,14 +293,233 @@ void guardar_archivo(const string &nombreArchivo, const vector<Secuencia> &memor
   
 }
 
-void codificar_archivo()
-{
-  cout << "Comando ejecutado\n";
+void codificar_archivo(const string& nombreArchivo, const vector<Secuencia>& memoria) {
+    // --- PASO 1: Validar que hay secuencias en memoria ---
+    if (memoria.empty()) {
+        std::cout << "(no hay secuencias cargadas) No hay secuencias cargadas en memoria." << std::endl;
+        return;
+    }
+
+    // --- PASO 2: Calcular la tabla de frecuencias ---
+    std::map<char, int> mapaFrecuencias;
+    for (const Secuencia& seq : memoria) {
+        for (char base : seq.getDatos()) {
+            mapaFrecuencias[base]++;
+        }
+    }
+
+    // --- PASO 3: Construir el árbol y generar los códigos ---
+    ArbolHuffman arbol;
+    arbol.construirDesdeFrecuencias(mapaFrecuencias);
+   
+
+    std::map<char, std::string> codigos;
+     arbol.generarCodigo(arbol.obtenerRaiz(), "", codigos);
+
+    // --- PASO 4: Abrir el archivo de salida en modo binario ---
+    std::ofstream archivoSalida(nombreArchivo, std::ios::binary);
+    if (!archivoSalida.is_open()) {
+        std::cout << "(mensaje de error) No se pueden guardar las secuencias cargadas en " << nombreArchivo << "." << std::endl;
+        return;
+    }
+
+    // --- PASO 5: Escribir la cabecera del archivo .fabin ---
+    
+    // n: Cantidad de bases diferentes (2 bytes) [cite: 182]
+    short n_bases = mapaFrecuencias.size();
+    archivoSalida.write(reinterpret_cast<const char*>(&n_bases), sizeof(short));
+
+    // Tabla de frecuencias: n veces (c_i, f_i) [cite: 183]
+    // c_i: Código de la base (1 byte)
+    // f_i: Frecuencia (8 bytes, usamos long long para asegurar)
+    for (const auto& par : mapaFrecuencias) {
+        char caracter = par.first;
+        long long frecuencia = par.second;
+        archivoSalida.write(&caracter, sizeof(char));
+        archivoSalida.write(reinterpret_cast<const char*>(&frecuencia), sizeof(long long));
+    }
+
+    // ns: Cantidad de secuencias (4 bytes) [cite: 184]
+    int ns = memoria.size();
+    archivoSalida.write(reinterpret_cast<const char*>(&ns), sizeof(int));
+    
+    // --- PASO 6: Escribir los datos de cada secuencia ---
+    for (const Secuencia& seq : memoria) {
+        // li: Tamaño del nombre (2 bytes) [cite: 185]
+        short nombreLen = seq.getNombre().length();
+        archivoSalida.write(reinterpret_cast<const char*>(&nombreLen), sizeof(short));
+
+        // sij: Caracteres del nombre [cite: 186]
+        archivoSalida.write(seq.getNombre().c_str(), nombreLen);
+
+        // wi: Longitud de la secuencia (8 bytes) [cite: 187]
+        long long secuenciaLen = seq.getDatos().length();
+        archivoSalida.write(reinterpret_cast<const char*>(&secuenciaLen), sizeof(long long));
+        
+        // xi: Justificación (ancho de línea) (2 bytes) [cite: 188]
+        short justificacion = seq.getCantidadPorLinea(); // Necesitarás este método en tu clase Secuencia
+        archivoSalida.write(reinterpret_cast<const char*>(&justificacion), sizeof(short));
+        
+        // binary_code: La secuencia codificada [cite: 189]
+        std::string bufferBits = "";
+        for (char base : seq.getDatos()) {
+            bufferBits += codigos[base];
+        }
+
+        // --- Manejo de bits y padding ---
+        unsigned char byte = 0;
+        int bitCount = 0;
+        for (char bit : bufferBits) {
+            byte = (byte << 1) | (bit - '0');
+            bitCount++;
+            if (bitCount == 8) {
+                archivoSalida.write(reinterpret_cast<const char*>(&byte), sizeof(unsigned char));
+                byte = 0;
+                bitCount = 0;
+            }
+        }
+        // Escribir los bits restantes (padding con ceros a la derecha)
+        if (bitCount > 0) {
+            byte <<= (8 - bitCount);
+            archivoSalida.write(reinterpret_cast<const char*>(&byte), sizeof(unsigned char));
+        }
+    }
+
+    archivoSalida.close();
+    std::cout << "Secuencias codificadas y almacenadas en " << nombreArchivo << "." << std::endl;
 }
 
-void decodificar_archivo()
-{
-  cout << "Comando ejecutado\n";
+string codificar(string dato, map<char, string> &codigos) {
+    string encadenado;
+
+    for (int i = 0; i < dato.size(); ++i) {
+        char c = dato[i];
+        encadenado += codigos.at(c);
+    }
+
+    return encadenado;
+}
+
+void decodificar_archivo(const string& nombreArchivo, vector<Secuencia>& memoria) {
+    // --- PASO 1: Validar extensión y abrir el archivo en modo binario ---
+    if (nombreArchivo.length() < 6 || nombreArchivo.substr(nombreArchivo.length() - 6) != ".fabin") {
+        std::cout << "(mensaje de error) No se pueden cargar las secuencias desde " << nombreArchivo << "." << std::endl;
+        return;
+    }
+    std::ifstream archivoEntrada(nombreArchivo, std::ios::binary);
+    if (!archivoEntrada.is_open()) {
+        std::cout << "(mensaje de error) No se pueden cargar las secuencias desde " << nombreArchivo << "." << std::endl;
+        return;
+    }
+
+    // --- PASO 2: Limpiar la memoria actual ---
+    memoria.clear();
+
+    // --- PASO 3: Leer la cabecera del archivo ---
+    
+    // n: Cantidad de bases diferentes (2 bytes)
+    short n_bases;
+    archivoEntrada.read(reinterpret_cast<char*>(&n_bases), sizeof(short));
+    if (archivoEntrada.gcount() != sizeof(short)) { // Verificar que la lectura fue exitosa
+        std::cout << "(mensaje de error) El archivo esta corrupto o tiene un formato invalido." << std::endl;
+        return;
+    }
+
+    // Tabla de frecuencias: n veces (c_i, f_i)
+    std::map<char, int> mapaFrecuencias;
+    for (int i = 0; i < n_bases; ++i) {
+        char caracter;
+        long long frecuencia;
+        archivoEntrada.read(&caracter, sizeof(char));
+        archivoEntrada.read(reinterpret_cast<char*>(&frecuencia), sizeof(long long));
+        mapaFrecuencias[caracter] = static_cast<int>(frecuencia); // Convertir de nuevo a int para tu árbol
+    }
+
+    // --- PASO 4: Reconstruir el árbol de Huffman ---
+    ArbolHuffman arbol;
+    arbol.construirDesdeFrecuencias(mapaFrecuencias);
+
+    // ns: Cantidad de secuencias (4 bytes)
+    int ns;
+    archivoEntrada.read(reinterpret_cast<char*>(&ns), sizeof(int));
+
+    // --- PASO 5: Leer y decodificar cada secuencia ---
+    for (int i = 0; i < ns; ++i) {
+        // li: Tamaño del nombre (2 bytes)
+        short nombreLen;
+        archivoEntrada.read(reinterpret_cast<char*>(&nombreLen), sizeof(short));
+
+        // sij: Caracteres del nombre
+        std::string nombreSecuencia(nombreLen, '\0');
+        archivoEntrada.read(&nombreSecuencia[0], nombreLen);
+
+        // wi: Longitud de la secuencia (8 bytes)
+        long long secuenciaLen;
+        archivoEntrada.read(reinterpret_cast<char*>(&secuenciaLen), sizeof(long long));
+        
+        // xi: Justificación (ancho de línea) (2 bytes)
+        short justificacion;
+        archivoEntrada.read(reinterpret_cast<char*>(&justificacion), sizeof(short));
+
+        // --- Decodificar el binary_code ---
+        std::string contenidoDecodificado = "";
+        Nodo* nodoActual = arbol.obtenerRaiz();
+        
+        // Manejo especial para árboles con un solo nodo
+        if (!nodoActual->obtenerIzq() && !nodoActual->obtenerDer()) {
+             contenidoDecodificado = std::string(secuenciaLen, nodoActual->obtenerDatos());
+             // Hay que "consumir" los bytes del archivo aunque no los usemos
+             long long bytesAvanzar = (secuenciaLen + 7) / 8; // Aproximar al byte superior
+             archivoEntrada.seekg(bytesAvanzar, std::ios_base::cur);
+        } else {
+            unsigned char byte;
+            while (contenidoDecodificado.length() < secuenciaLen && archivoEntrada.read(reinterpret_cast<char*>(&byte), sizeof(byte))) {
+                for (int bit = 7; bit >= 0 && contenidoDecodificado.length() < secuenciaLen; --bit) {
+                    // Moverse en el árbol según el bit
+                    if ((byte >> bit) & 1) {
+                        nodoActual = nodoActual->obtenerDer();
+                    } else {
+                        nodoActual = nodoActual->obtenerIzq();
+                    }
+                    
+                    // Si llegamos a una hoja
+                    if (!nodoActual->obtenerIzq() && !nodoActual->obtenerDer()) {
+                        contenidoDecodificado += nodoActual->obtenerDatos();
+                        nodoActual = arbol.obtenerRaiz(); // Volver a la raíz para el siguiente caracter
+                    }
+                }
+            }
+        }
+        
+        // --- Guardar la secuencia decodificada en memoria ---
+        Secuencia seq(nombreSecuencia, ""); // Crear objeto Secuencia
+        seq.setDatos(contenidoDecodificado);
+        seq.setCantidadPorLinea(justificacion); // Necesitarás este método en tu clase Secuencia
+        memoria.push_back(seq);
+    }
+
+    archivoEntrada.close();
+    std::cout << "Secuencias decodificadas desde " << nombreArchivo << " y cargadas en memoria." << std::endl;
+}
+
+string decodificar(string bits, ArbolHuffman &arbol) {
+
+    string resultado;
+    Nodo* actual = arbol.obtenerRaiz();
+
+    for ( int i = 0; i < bits.size(); ++i) {
+        char bit = bits[i];
+        if (bit == '0')
+            actual = actual->obtenerIzq();
+        else
+            actual = actual->obtenerDer();
+        if (actual->obtenerIzq() == nullptr && actual->obtenerDer() == nullptr) {
+            resultado += actual->obtenerDatos();
+            actual = arbol.obtenerRaiz();
+    }
+    }
+
+    return resultado;
 }
 
 void ruta_mas_corta()

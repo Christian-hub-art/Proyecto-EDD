@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 #include "Secuencia.h"
+#include "ArbolHuffman.h"
+
 
 
 using namespace std;
@@ -131,7 +133,7 @@ int main()
         {
             if (index == 2)
             {
-                codificar_archivo();
+                codificar_archivo(tokens[1], memoria);
             }
             else
             {
@@ -142,7 +144,7 @@ int main()
         {
             if (index == 2)
             {
-                decodificar_archivo();
+                decodificar_archivo(tokens[1], memoria);
             }
             else
             {
