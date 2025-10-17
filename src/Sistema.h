@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
+#include <map>
 #include "Secuencia.h"
 
 
@@ -23,6 +24,8 @@ void ruta_mas_corta();
 void base_remota();
 void ayuda();
 void ayudaComando(string comando);
+void codificarArchivo(const string& nombreArchivo, const vector<Secuencia>& memoria);
+void decodificarArchivo(const string& archivoEntrada, vector<Secuencia>& memoria);
 
 // Funciones auxiliares
 
