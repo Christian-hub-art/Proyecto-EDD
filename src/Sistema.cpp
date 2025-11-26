@@ -340,17 +340,21 @@ void codificarArchivo(const string& nombreArchivo, const vector<Secuencia>& memo
     uint32_t ns = memoria.size();
     salida.write(reinterpret_cast<char*>(&ns), sizeof(uint32_t));
 
-    
     for (const Secuencia& seq : memoria) {
         const string& nombre = seq.getNombre();
-        const string& datos = seq.getDatos();
-        int ancho = seq.getCantidadPorLinea();
         uint16_t li = nombre.size();
         salida.write(reinterpret_cast<char*>(&li), sizeof(uint16_t));
         salida.write(nombre.c_str(), li);
+    }
+
+
+    for (const Secuencia& seq : memoria) {
+        const string& datos = seq.getDatos();
+        int ancho = seq.getCantidadPorLinea();
 
         uint32_t wi = static_cast<uint32_t>(datos.size());
         int xi = ancho;
+
         salida.write(reinterpret_cast<char*>(&wi), sizeof(uint32_t));
         salida.write(reinterpret_cast<char*>(&xi), sizeof(int));
 
@@ -407,13 +411,19 @@ void decodificarArchivo(const string& archivoEntrada, vector<Secuencia>& memoria
     uint32_t ns;
     entrada.read(reinterpret_cast<char*>(&ns), sizeof(uint32_t));
 
-   
     for (uint32_t i = 0; i < ns; i++) {
-        // Nombre
         uint16_t li;
         entrada.read(reinterpret_cast<char*>(&li), sizeof(uint16_t));
+        
         string nombre(li, '\0');
         entrada.read(&nombre[0], li);
+        
+        // Creamos la secuencia vacía y la guardamos
+        memoria.push_back(Secuencia(nombre));
+    }
+
+   
+    for (uint32_t i = 0; i < ns; i++) {
         uint32_t wi;
         int xi;
         entrada.read(reinterpret_cast<char*>(&wi), sizeof(uint32_t));
@@ -439,11 +449,8 @@ void decodificarArchivo(const string& archivoEntrada, vector<Secuencia>& memoria
         // Decodificar exactamente bitLength bits
         string contenido = arbol.decodificar(bits.substr(0, bitLength));
 
-        Secuencia nuevaSecuencia(nombre, contenido);
-        nuevaSecuencia.setCantidadPorLinea(xi);
-
-        // Guardar en memoria
-        memoria.push_back(nuevaSecuencia);
+        memoria[i].setDatos(contenido);
+        memoria[i].setCantidadPorLinea(xi);
     }
 
     entrada.close();
