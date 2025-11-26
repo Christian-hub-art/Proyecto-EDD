@@ -439,8 +439,11 @@ void decodificarArchivo(const string& archivoEntrada, vector<Secuencia>& memoria
         // Decodificar exactamente bitLength bits
         string contenido = arbol.decodificar(bits.substr(0, bitLength));
 
+        Secuencia nuevaSecuencia(nombre, contenido);
+        nuevaSecuencia.setCantidadPorLinea(xi);
+
         // Guardar en memoria
-        memoria.push_back(Secuencia(nombre, contenido));
+        memoria.push_back(nuevaSecuencia);
     }
 
     entrada.close();
