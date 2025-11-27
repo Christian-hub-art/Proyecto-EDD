@@ -20,7 +20,7 @@ void enmascarar_subsecuencia(const string subsecuencia, vector <Secuencia>& memo
 void guardar_archivo(const string& nombreArchivo, const vector<Secuencia>& memoria);
 void codificar_archivo();
 void decodificar_archivo();
-void ruta_mas_corta();
+void ruta_mas_corta(string descripcion_secuencia, int i, int j, int x, int y, vector<Secuencia>& memoria);
 void base_remota();
 void ayuda();
 void ayudaComando(string comando);

@@ -53,4 +53,7 @@ public:
     std::vector<std::vector<unsigned long>> dijkstra(unsigned long i_fuente); 
 };
 
-#endif // GRAFO_H
+#include "Grafo.cxx"
+
+#endif // GRAFO_HXX
+    

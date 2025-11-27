@@ -155,7 +155,7 @@ int main()
         {
             if (index == 6)
             {
-                ruta_mas_corta();
+                ruta_mas_corta(tokens[1], stoi(tokens[2]), stoi(tokens[3]), stoi(tokens[4]), stoi(tokens[5]), memoria);
             }
             else
             {

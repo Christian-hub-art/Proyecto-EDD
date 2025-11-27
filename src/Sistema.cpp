@@ -7,8 +7,10 @@
 #include <vector>
 #include <fstream>
 #include <cstdint>
+#include <cmath>
 #include <bitset>
 #include "ArbolHuffman.h"
+#include "Grafo.hxx"
 
 using namespace std;
 
@@ -457,9 +459,73 @@ void decodificarArchivo(const string& archivoEntrada, vector<Secuencia>& memoria
     cout << " Archivo decodificado correctamente.\n";
 }
 
-void ruta_mas_corta()
+Grafo<char> crearGrafo(string descripcion_secuencia, vector<Secuencia>& memoria){
+  int a = 0;
+  bool encontrada = false;
+
+  // Buscar la secuencia
+  for( a= 0 ; a < memoria.size(); a++){
+    if( memoria[a].getNombre() == descripcion_secuencia){
+      encontrada = true;
+      break;
+    }
+  }
+
+  if (!encontrada) {
+      return Grafo<char>("",0);
+  }
+  int cantidad_por_linea = memoria[a].getCantidadPorLinea();
+  int tamano_secuencia = memoria[a].getDatos().length();
+  int indice_max_de_filas = trunc(tamano_secuencia/cantidad_por_linea);
+  int cantidad_ultima_fila = tamano_secuencia % cantidad_por_linea;
+
+
+  Grafo <char> grafo(descripcion_secuencia, cantidad_por_linea);
+
+
+  // crear vertices
+  for ( int v = 0; v < tamano_secuencia; v++){
+    grafo.insertarVertice((char)(memoria[a].getDatos()[v]));
+  }
+
+  // crear aristas (dentro de la parte rectangular)
+  for ( int x = 0; x < indice_max_de_filas; x++){
+    for ( int y = 0; y < cantidad_por_linea-1; y++){
+      grafo.insertarArista(x, y, x+1, y); // abajo
+      grafo.insertarArista(x, y, x, y+1); // derecha
+    }
+    grafo.insertarArista(x, cantidad_por_linea-1, x+1, cantidad_por_linea-1); // ultima columna abajo
+  }
+  //crear aristas penultima fila
+  int j = 0;
+  while( j < cantidad_ultima_fila){
+    grafo.insertarArista(indice_max_de_filas-1, j, indice_max_de_filas-2, j); // penultima fila abajo
+    j++;
+  }
+
+  for (j= 0; j < cantidad_por_linea-1; j++){
+    grafo.insertarArista(indice_max_de_filas-1, j, indice_max_de_filas-1, j+1); // penultima fila derecha
+  }
+
+  // crear aristas ultima fila
+  for( int y = 0; y < cantidad_ultima_fila-1; y++){
+    grafo.insertarArista(indice_max_de_filas, y, indice_max_de_filas, y+1); // ultima fila derecha
+  }
+
+  cout << "cantidad de aristas: " << grafo.cantAristas() << endl;
+
+  return grafo;
+}
+
+
+void ruta_mas_corta(string descripcion_secuencia, int i, int j, int x, int y, vector<Secuencia>& memoria)
 {
-  cout << "Comando ejecutado\n";
+  Grafo<char> grafo = crearGrafo(descripcion_secuencia, memoria);
+  if( grafo.cantVertices() == 0){
+    cout << "No se puede crear el grafo ya que la secuencia no existe\n";
+    return;
+  }
+
 }
 
 void base_remota()

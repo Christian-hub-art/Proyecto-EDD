@@ -1,5 +1,5 @@
-#ifndef GRAFO_CPP
-#define GRAFO_CPP
+#ifndef GRAFO_CXX
+#define GRAFO_CXX
 
 #include <iostream>
 #include <limits>
@@ -82,9 +82,8 @@ int Grafo<T>::buscarVertice(const int x, const int y) const {
 // Insertar un vértice
 template <class T>
 bool Grafo<T>::insertarVertice(const T& ver) {
-    if (buscarVertice(ver) != -1) return false; // Ya existe
     vertices.push_back(ver);
-    aristas.emplace_back(); // Añadir un mapa vacío para el nuevo vértice
+    aristas.emplace_back(); // Añadir un nuevo mapa para las aristas del nuevo vértice
     return true;
 }
 
@@ -95,8 +94,9 @@ bool Grafo<T>::insertarArista(const int x, const int y, const int i, const int j
     int i_des = buscarVertice(i, j);
     if (i_ori == -1 || i_des == -1) return false; // Vértices no encontrados
     // Insertar o actualizar el costo de la arista
-    aristas[i_ori][i_des] = cos;
-    aristas[i_des][i_ori] = cos;
+    float costo = 1/(1+abs(vertices[i_ori] - vertices[i_des]));
+    aristas[i_ori][i_des] = costo;
+    aristas[i_des][i_ori] = costo;
     return true;
 }
 
@@ -371,5 +371,4 @@ double Grafo<T>::obtenerCosto(int id1, int id2) const {
 }
 
 
-
-#endif // GRAFO_CPP
+#endif // GRAFO_CXX
