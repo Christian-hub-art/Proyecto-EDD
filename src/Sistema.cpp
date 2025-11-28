@@ -575,7 +575,27 @@ void base_remota(string descripcion_secuencia, int i, int j, vector<Secuencia>& 
   }
 
   vector<std::pair<int, float>> resultado_dijkstra = grafo.dijkstra(indice_origen);
+  float peso_mayor_base_remota = 0;
+  int indice_base_remota = 0;
+  for( int k = 0 ; k < resultado_dijkstra.size(); k++){
+    if(grafo.buscarBase(k)== grafo.buscarBase(indice_origen)){
+      if( resultado_dijkstra[k].second > peso_mayor_base_remota){
+        peso_mayor_base_remota = resultado_dijkstra[k].second;
+        indice_base_remota = k;
+      }
+    }
+  }
+  pair <int, int> coordenadas_base_remota = grafo.calcularCoordenadas(indice_base_remota);
+  cout << "La base remosta esta ubicada en [" << coordenadas_base_remota.first << ", " << coordenadas_base_remota.second << "] y la ruta entre la base en [" << i << ", " << j << "] y la base remota en [" << coordenadas_base_remota.first << ", " << coordenadas_base_remota.second << "] es : ";
+  vector<unsigned long> ruta = grafo.construirRutaDijkstra( resultado_dijkstra, indice_origen, indice_base_remota);
+  for( int k = 0; k < ruta.size()-1; k++){
+    cout << grafo.buscarBase(ruta[k])<< " [";
+    cout << grafo.calcularCoordenadas(ruta[k]).first << ", " << grafo.calcularCoordenadas(ruta[k]).second << "] ->";
+  }
+  cout << grafo.buscarBase(ruta[ruta.size()-1])<< " [";
+  cout << grafo.calcularCoordenadas(ruta[ruta.size()-1]).first << ", " << grafo.calcularCoordenadas(ruta[ruta.size()-1]).second << "] \n";
 
+  cout << " El costo total de la ruta es: " << peso_mayor_base_remota << "\n";
 
 }
 
