@@ -166,7 +166,7 @@ int main()
         {
             if (index == 4)
             {
-                base_remota();
+                base_remota(tokens[1], stoi(tokens[2]), stoi(tokens[3]), memoria);
             }
             else
             {

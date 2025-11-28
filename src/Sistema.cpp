@@ -560,9 +560,23 @@ void ruta_mas_corta(string descripcion_secuencia, int i, int j, int x, int y, ve
   cout << " El costo total de la ruta es: " << resultado_dijkstra[indice_destino].second << "\n";
 }
 
-void base_remota()
+void base_remota(string descripcion_secuencia, int i, int j, vector<Secuencia>& memoria)
 {
-  cout << "Comando ejecutado\n";
+   Grafo<char> grafo = crearGrafo(descripcion_secuencia, memoria);
+  if( grafo.cantVertices() == 0){
+    cout << "La secuencia " << descripcion_secuencia << " no existe\n";
+    return;
+  }
+
+  int indice_origen = grafo.calcularIndice(i, j);
+  if ( indice_origen == -1){
+    cout << " La base en la posición [" << i << ", " << j << "] no existe\n";
+    return;
+  }
+
+  vector<std::pair<int, float>> resultado_dijkstra = grafo.dijkstra(indice_origen);
+
+
 }
 
 void ayuda()

@@ -21,7 +21,7 @@ void guardar_archivo(const string& nombreArchivo, const vector<Secuencia>& memor
 void codificar_archivo();
 void decodificar_archivo();
 void ruta_mas_corta(string descripcion_secuencia, int i, int j, int x, int y, vector<Secuencia>& memoria);
-void base_remota();
+void base_remota(string descripcion_secuencia, int i, int j, vector<Secuencia>& memoria);
 void ayuda();
 void ayudaComando(string comando);
 void codificarArchivo(const string& nombreArchivo, const vector<Secuencia>& memoria);
