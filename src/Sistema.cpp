@@ -483,7 +483,7 @@ Grafo<char> crearGrafo(string descripcion_secuencia, vector<Secuencia>& memoria)
     indice_max_de_filas -= 1;
     cantidad_ultima_fila = cantidad_por_linea;
   }
-  
+
   Grafo <char> grafo(descripcion_secuencia, cantidad_por_linea);
 
 
@@ -526,10 +526,38 @@ void ruta_mas_corta(string descripcion_secuencia, int i, int j, int x, int y, ve
 {
   Grafo<char> grafo = crearGrafo(descripcion_secuencia, memoria);
   if( grafo.cantVertices() == 0){
-    cout << "No se puede crear el grafo ya que la secuencia no existe\n";
+    cout << "La secuencia " << descripcion_secuencia << " no existe\n";
     return;
   }
 
+  int indice_origen = grafo.calcularIndice(i, j);
+  if ( indice_origen == -1){
+    cout << " La base en la posición [" << i << ", " << j << "] no existe\n";
+    return;
+  }
+
+  int indice_destino = grafo.calcularIndice(x, y);
+
+  if ( indice_destino == -1){
+    cout << " La base en la posición [" << x << ", " << y << "] no existe\n";
+    return;
+  }
+
+  vector<std::pair<int, float>> resultado_dijkstra = grafo.dijkstra(indice_origen);
+  
+  vector<unsigned long> ruta = grafo.construirRutaDijkstra( resultado_dijkstra, indice_origen, indice_destino);
+
+  cout << " Para la secuencia " << descripcion_secuencia << ", la ruta mas corta entre la base "<< grafo.buscarBase(indice_origen)
+  << "en [" << i<< ", " << j << "] y la base "<< grafo.buscarBase(indice_destino) << " en [" << x << ", " << y << "] es: ";
+
+  for( int k = 0; k < ruta.size()-1; k++){
+    cout << grafo.buscarBase(ruta[k])<< " [";
+    cout << grafo.calcularCoordenadas(ruta[k]).first << ", " << grafo.calcularCoordenadas(ruta[k]).second << "] ->";
+  }
+  cout << grafo.buscarBase(ruta[ruta.size()-1])<< " [";
+  cout << grafo.calcularCoordenadas(ruta[ruta.size()-1]).first << ", " << grafo.calcularCoordenadas(ruta[ruta.size()-1]).second << "] \n";
+
+  cout << " El costo total de la ruta es: " << resultado_dijkstra[indice_destino].second << "\n";
 }
 
 void base_remota()

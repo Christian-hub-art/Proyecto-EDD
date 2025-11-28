@@ -34,7 +34,10 @@ public:
     // Métodos de consulta
     int cantVertices() const;
     int cantAristas() const;
-    int buscarVertice(const int x, const int y ) const;
+    char buscarBase(const int indice ) const;
+    int calcularIndice(int x, int y) const;
+    std::pair <int, int> calcularCoordenadas(int indice) const;
+
     float buscarArista(const T &origen, const T &destino) const;
     double obtenerCosto(int id1, int id2) const;
 

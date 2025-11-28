@@ -69,7 +69,22 @@ int Grafo<T>::cantAristas() const {
 
 // Buscar índice de un vértice
 template <class T>
-int Grafo<T>::buscarVertice(const int x, const int y) const {
+char Grafo<T>::buscarBase(int indice) const {
+    if (indice >= 0 && indice < vertices.size()) {
+        return vertices[indice];
+    }
+    return '\0'; 
+}
+
+template <class T>
+std::pair<int, int> Grafo<T>::calcularCoordenadas(int indice) const {
+    int x = trunc(indice / cantidad_por_linea);
+    int y = indice % cantidad_por_linea;
+    return std::make_pair(x, y);
+}
+
+template <class T>
+int Grafo<T>::calcularIndice(int x, int y) const {
     int posicion;
     posicion = x * cantidad_por_linea + y;
 
@@ -90,11 +105,11 @@ bool Grafo<T>::insertarVertice(const T& ver) {
 // Insertar una arista dirigida
 template <class T>
 bool Grafo<T>::insertarArista(const int x, const int y, const int i, const int j) {
-    int i_ori = buscarVertice(x, y);
-    int i_des = buscarVertice(i, j);
+    int i_ori = calcularIndice(x, y);
+    int i_des = calcularIndice(i, j);
     if (i_ori == -1 || i_des == -1) return false; // Vértices no encontrados
     // Insertar o actualizar el costo de la arista
-    float costo = 1/(1+abs(vertices[i_ori] - vertices[i_des]));
+    float costo = 1.0/(1+abs(vertices[i_ori] - vertices[i_des]));
     aristas[i_ori][i_des] = costo;
     aristas[i_des][i_ori] = costo;
     return true;
@@ -103,8 +118,8 @@ bool Grafo<T>::insertarArista(const int x, const int y, const int i, const int j
 // Buscar costo de una arista
 template <class T>
 float Grafo<T>::buscarArista(const T &origen, const T &destino) const {
-    int i_ori = buscarVertice(origen);
-    int i_des = buscarVertice(destino);
+    int i_ori = calcularIndice(origen);
+    int i_des = calcularIndice(destino);
     if (i_ori == -1 || i_des == -1) return -1.0f; // Indica que no existe
     auto it = aristas[i_ori].find(i_des);
     if (it != aristas[i_ori].end()) {
@@ -116,8 +131,8 @@ float Grafo<T>::buscarArista(const T &origen, const T &destino) const {
 // Eliminar una arista dirigida
 template <class T>
 bool Grafo<T>::eliminarArista(const T &origen, const T &destino) {
-    int i_ori = buscarVertice(origen);
-    int i_des = buscarVertice(destino);
+    int i_ori = calcularIndice(origen);
+    int i_des = calcularIndice(destino);
     if (i_ori == -1 || i_des == -1) return false; // Vértices no encontrados
     auto it = aristas[i_ori].find(i_des);
     if (it != aristas[i_ori].end()) {
@@ -138,7 +153,7 @@ bool Grafo<T>::elimAristaNoDir(const T& ori, const T& des) {
 // Eliminar un vértice
 template <class T>
 bool Grafo<T>::eliminarVertice(const T& ver) {
-    int i_ver = buscarVertice(ver);
+    int i_ver = calcularIndice(ver);
     if (i_ver == -1) return false; // Vértice no encontrado
 
     // Eliminar el vértice del vector de vértices
@@ -176,7 +191,7 @@ bool Grafo<T>::eliminarVertice(const T& ver) {
 // Obtener vecinos de un vértice
 template <class T>
 std::vector<T> Grafo<T>::vecinosVertice(const T& ver) const {
-    int indice = buscarVertice(ver);
+    int indice = calcularIndice(ver);
     std::vector<T> ver_vecinos;
 
     if (indice != -1) {
@@ -207,7 +222,7 @@ std::vector<T> Grafo<T>::DFS(const T& ver_inicial) {
     std::vector<T> caminoDFS;
     std::stack<int> pila_ver;
 
-    int indice_inicial = buscarVertice(ver_inicial);
+    int indice_inicial = calcularIndice(ver_inicial);
     if (indice_inicial == -1) {
         // Vértice no encontrado, retornar camino vacío
         return caminoDFS;
@@ -253,7 +268,7 @@ std::vector<T> Grafo<T>::BFS(const T& ver_inicial) {
     std::vector<T> caminoBFS;
     std::queue<int> cola_ver;
 
-    int indice_inicial = buscarVertice(ver_inicial);
+    int indice_inicial = calcularIndice(ver_inicial);
     if (indice_inicial == -1) {
         // Vértice no encontrado, retornar camino vacío
         return caminoBFS;
@@ -320,7 +335,7 @@ std::vector<std::pair<int, float>> Grafo<T>::dijkstra(unsigned long i_fuente) {
 
         vecinos= indicesVecinos(menor);
         for (int i = 0; i < vecinos.size(); ++i) {
-            int peso = aristas[menor][vecinos[i]];
+            float peso = aristas[menor][vecinos[i]];
             if (dist[menor] + peso < dist[vecinos[i]]) {
                 dist[vecinos[i]] = dist[menor] + peso;
                 pred[vecinos[i]] = menor;
@@ -329,7 +344,7 @@ std::vector<std::pair<int, float>> Grafo<T>::dijkstra(unsigned long i_fuente) {
     }
 
     for (unsigned long i = 0; i < cantVertices(); i++) {
-        resultado[i] = std::make_pair(static_cast<int>(pred[i]), dist[i]);
+        resultado[i] = std::make_pair(pred[i], dist[i]);
     }
 
     return resultado;
@@ -340,22 +355,23 @@ template <class T>
 std::vector<unsigned long> Grafo<T>::construirRutaDijkstra(std::vector<std::pair<int, float>> dijkstra, int i_fuente, int i_destino) {
    
     std::vector<unsigned long> rutita;
-    std::vector<unsigned long> rutitaInversa;
+    std::stack<unsigned long> rutitaInversa;
    
     //Construir ruta de i_fuente a i_destino
     int predecesor;
 
-    predecesor= pred[i_destino];
+    predecesor= dijkstra[i_destino].first;
     if(!(predecesor ==-1)){
         if(i_destino!=i_fuente)
-        rutitaInversa.push_back(i_destino);
-        rutitaInversa.push_back((unsigned long) predecesor);
+        rutitaInversa.push(i_destino);
+        rutitaInversa.push((unsigned long) predecesor);
         while(!(predecesor==i_fuente) ){
-            predecesor= pred[predecesor];
-            rutitaInversa.push_back(predecesor);
+            predecesor= dijkstra[predecesor].first;
+            rutitaInversa.push(predecesor);
         }
-        for(int j=rutitaInversa.size()-1; j>-1; j--){
-            rutita.push_back(rutitaInversa[j]);
+        while (!rutitaInversa.empty()) {
+            rutita.push_back(rutitaInversa.top());
+            rutitaInversa.pop();
         }
     }
 
