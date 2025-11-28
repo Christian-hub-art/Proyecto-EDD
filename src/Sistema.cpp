@@ -479,7 +479,11 @@ Grafo<char> crearGrafo(string descripcion_secuencia, vector<Secuencia>& memoria)
   int indice_max_de_filas = trunc(tamano_secuencia/cantidad_por_linea);
   int cantidad_ultima_fila = tamano_secuencia % cantidad_por_linea;
 
-
+  if(cantidad_ultima_fila == 0){
+    indice_max_de_filas -= 1;
+    cantidad_ultima_fila = cantidad_por_linea;
+  }
+  
   Grafo <char> grafo(descripcion_secuencia, cantidad_por_linea);
 
 

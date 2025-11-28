@@ -280,15 +280,14 @@ std::vector<T> Grafo<T>::BFS(const T& ver_inicial) {
 
 // Implementación de Dijkstra
 template <class T>
-std::vector<std::vector<unsigned long>> Grafo<T>::dijkstra(unsigned long i_fuente) {
+std::vector<std::pair<int, float>> Grafo<T>::dijkstra(unsigned long i_fuente) {
     int numVertices = cantVertices();
     std::vector<float> dist(numVertices, std::numeric_limits<float>::max());
     std::vector<unsigned long> pred(numVertices, static_cast<unsigned long>(-1));
     std::vector<unsigned long> q;
 
-    std::vector<std::vector<unsigned long>> todasRutas;
-    std::vector<unsigned long> rutita;
-    std::vector<unsigned long> rutitaInversa;
+
+    std::vector<std::pair<int, float>> resultado(numVertices);
     std::vector<unsigned long> vecinos;
 
     // Inicializar la cola con todos los vértices
@@ -329,29 +328,38 @@ std::vector<std::vector<unsigned long>> Grafo<T>::dijkstra(unsigned long i_fuent
         }
     }
 
-    //Construir rutas
-    int predecesor;
-    for(int i=0 ; i<cantVertices(); i++){
-        predecesor= pred[i];
-        if(!(predecesor ==-1)){
-            if(i!=i_fuente)
-            rutitaInversa.push_back(i);
-            rutitaInversa.push_back((unsigned long) predecesor);
-            while(!(predecesor==i_fuente) ){
-                predecesor= pred[predecesor];
-                rutitaInversa.push_back(predecesor);
-            }
-            for(int j=rutitaInversa.size()-1; j>-1; j--){
-                rutita.push_back(rutitaInversa[j]);
-            }
-            todasRutas.push_back(rutita);
-        }
-        
-        rutita.clear();
-        rutitaInversa.clear();
+    for (unsigned long i = 0; i < cantVertices(); i++) {
+        resultado[i] = std::make_pair(static_cast<int>(pred[i]), dist[i]);
     }
 
-    return todasRutas;
+    return resultado;
+}
+
+
+template <class T>
+std::vector<unsigned long> Grafo<T>::construirRutaDijkstra(std::vector<std::pair<int, float>> dijkstra, int i_fuente, int i_destino) {
+   
+    std::vector<unsigned long> rutita;
+    std::vector<unsigned long> rutitaInversa;
+   
+    //Construir ruta de i_fuente a i_destino
+    int predecesor;
+
+    predecesor= pred[i_destino];
+    if(!(predecesor ==-1)){
+        if(i_destino!=i_fuente)
+        rutitaInversa.push_back(i_destino);
+        rutitaInversa.push_back((unsigned long) predecesor);
+        while(!(predecesor==i_fuente) ){
+            predecesor= pred[predecesor];
+            rutitaInversa.push_back(predecesor);
+        }
+        for(int j=rutitaInversa.size()-1; j>-1; j--){
+            rutita.push_back(rutitaInversa[j]);
+        }
+    }
+
+    return rutita;
 }
 
 // Implementación de obtenerCosto

@@ -50,7 +50,8 @@ public:
     std::vector<unsigned long> indicesVecinos(int u) const; 
     std::vector<T> DFS(const T& ver_inicial);
     std::vector<T> BFS(const T& ver_inicial);   
-    std::vector<std::vector<unsigned long>> dijkstra(unsigned long i_fuente); 
+    std::vector<std::pair<int, float>> dijkstra(unsigned long i_fuente);
+    std::vector<unsigned long> construirRutaDijkstra(std::vector<std::pair<int, float>> dijkstra, int i_fuente, int i_destino);
 };
 
 #include "Grafo.cxx"
